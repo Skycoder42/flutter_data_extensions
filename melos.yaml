@@ -1,0 +1,16 @@
+name: flutter_data_extensions
+repository: https://github.com/Skycoder42/flutter_data_extensions
+
+packages:
+  - packages/**
+
+scripts:
+  get: dart pub global run melos exec -- dart pub get
+
+  hooks:init: >-
+    bash -c "echo -e
+    '#!/bin/sh\nexec dart pub global run melos run hooks:run'
+    > .git/hooks/pre-commit
+    && chmod a+x .git/hooks/pre-commit"
+
+  hooks:run: dart pub global run melos exec -c1 -- dart run dart_pre_commit
