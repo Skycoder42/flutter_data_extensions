@@ -23,3 +23,7 @@ doc/api/
 # melos files
 *.iml
 .idea
+
+# generated files
+*.g.dart
+main.data.dart
