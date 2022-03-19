@@ -14,9 +14,7 @@ class AccountSetup extends Setup {
     (ref) => const Account(idToken: '', localId: ''),
   );
 
-  final ProviderContainer di;
-
-  AccountSetup(this.di);
+  const AccountSetup(ProviderContainer di) : super(di);
 
   @override
   FutureOr<void> setUpAll() async {

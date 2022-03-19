@@ -6,6 +6,7 @@ import 'package:test/test.dart';
 import 'repositories/test.data.dart';
 import 'repositories/test_repository.dart';
 import 'setup/account_setup.dart';
+import 'setup/database_setup.dart';
 import 'setup/setup.dart';
 
 void main() {
@@ -20,6 +21,7 @@ void main() {
 
   Setup.setup([
     AccountSetup(di),
+    DatabaseSetup(di),
   ]);
 
   test('first test', () async {

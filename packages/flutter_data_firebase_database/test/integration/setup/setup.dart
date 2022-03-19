@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:flutter_data/flutter_data.dart';
 import 'package:test/test.dart' as test;
 
 abstract class Setup {
-  const Setup();
+  final ProviderContainer di;
+
+  const Setup(this.di);
 
   FutureOr<void> setUpAll() {}
   FutureOr<void> tearDownAll() {}
