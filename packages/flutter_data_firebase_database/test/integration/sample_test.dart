@@ -32,5 +32,11 @@ void main() {
     print(data);
     final allData = await testRepo.findAll();
     print(allData);
+
+    final updated =
+        await TestModel(id: data!.id, name: 'Hello Tree').was(data).save();
+    print(updated);
+
+    await updated.delete();
   });
 }

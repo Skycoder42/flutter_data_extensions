@@ -41,28 +41,30 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     OnDataError<R>? onError,
   }) {
     OnData<R>? actualOnSuccess;
+    String? actualBody;
 
-    if (requestType == DataRequestType.findAll) {
-      assert(onSuccess != null);
-      actualOnSuccess = _findAllOnSuccess(onSuccess!);
-    } else if (requestType == DataRequestType.save &&
-        method == DataRequestMethod.POST) {
-      assert(onSuccess != null);
-      assert(body != null);
-
-      actualOnSuccess = (data) {
-        if (data is Map<String, dynamic> &&
-            data.keys.length == 1 &&
-            data.keys.contains('name')) {
-          final jsonRequest = json.decode(body!) as Map<String, dynamic>;
-          return onSuccess!(<String, dynamic>{
-            ...jsonRequest,
-            'id': data['name'],
-          });
+    switch (requestType) {
+      case DataRequestType.findAll:
+        assert(onSuccess != null);
+        actualOnSuccess = _findAllOnSuccess(onSuccess!);
+        break;
+      case DataRequestType.findOne:
+        assert(onSuccess != null);
+        actualOnSuccess = _findOneOnSuccess(onSuccess!, uri);
+        break;
+      case DataRequestType.save:
+        assert(onSuccess != null);
+        assert(body != null);
+        if (method == DataRequestMethod.POST) {
+          actualOnSuccess = _savePostOnSuccess(onSuccess!, body!);
         } else {
-          return onSuccess!(data);
+          actualBody = _savePutOrPatchBody(body!);
+          actualOnSuccess = _savePutOrPatchOnSuccess(onSuccess!, uri);
         }
-      };
+        break;
+      case DataRequestType.delete:
+      case DataRequestType.adhoc:
+        break;
     }
 
     return super.sendRequest(
@@ -72,7 +74,7 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
       omitDefaultParams: omitDefaultParams,
       requestType: requestType,
       key: key,
-      body: body,
+      body: actualBody ?? body,
       onSuccess: actualOnSuccess ?? onSuccess,
       onError: onError,
     );
@@ -91,4 +93,56 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
           return onSuccess(rawData);
         }
       };
+
+  OnData<R> _findOneOnSuccess<R>(OnData<R> onSuccess, Uri uri) => (rawData) {
+        if (rawData is Map<String, dynamic>) {
+          return onSuccess(<String, dynamic>{
+            ...rawData,
+            'id': _idFromUrl(uri),
+          });
+        } else {
+          return onSuccess(rawData);
+        }
+      };
+
+  OnData<R> _savePostOnSuccess<R>(OnData<R> onSuccess, String requestBody) =>
+      (rawData) {
+        if (rawData is Map<String, dynamic> &&
+            rawData.keys.length == 1 &&
+            rawData.keys.contains('name')) {
+          final jsonRequest = json.decode(requestBody) as Map<String, dynamic>;
+          return onSuccess(<String, dynamic>{
+            ...jsonRequest,
+            'id': rawData['name'],
+          });
+        } else {
+          return onSuccess(rawData);
+        }
+      };
+
+  String _savePutOrPatchBody(String body) {
+    final dynamic jsonData = json.decode(body);
+    if (jsonData is Map<String, dynamic>) {
+      jsonData.remove('id');
+      return json.encode(jsonData);
+    } else {
+      return body;
+    }
+  }
+
+  OnData<R> _savePutOrPatchOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
+      (rawData) {
+        if (rawData is Map<String, dynamic>) {
+          return onSuccess(<String, dynamic>{
+            ...rawData,
+            'id': _idFromUrl(uri),
+          });
+        } else {
+          return onSuccess(rawData);
+        }
+      };
+
+  static late final _findOneUriIdRegExp = RegExp(r'\.json$');
+  String _idFromUrl(Uri uri) =>
+      uri.pathSegments.last.replaceAll(_findOneUriIdRegExp, '');
 }
