@@ -4,7 +4,7 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_data_firebase_database/flutter_data_firebase_database.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../global_setup.dart';
+import '../setup/account_setup.dart';
 
 part 'test_repository.g.dart';
 
@@ -22,14 +22,10 @@ class TestModel with DataModel<TestModel> {
 }
 
 mixin TestAdapter<T extends DataModel<T>> on FirebaseDatabaseAdapter<T> {
-  static late final accountProvider = StateProvider<FirebaseAnonAccount>(
-    (ref) => const FirebaseAnonAccount(idToken: '', localId: ''),
-  );
-
   @override
   String get baseUrl =>
-      'https://flutter-data-extensions-default-rtdb.europe-west1.firebasedatabase.app/${read(accountProvider).localId}';
+      'https://flutter-data-extensions-default-rtdb.europe-west1.firebasedatabase.app/${read(AccountSetup.accountProvider).localId}';
 
   @override
-  String get idToken => read(accountProvider).idToken;
+  String get idToken => read(AccountSetup.accountProvider).idToken;
 }
