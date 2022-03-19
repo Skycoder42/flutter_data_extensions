@@ -16,6 +16,9 @@ class TestModel with DataModel<TestModel> {
   final String name;
 
   TestModel({this.id, required this.name});
+
+  @override
+  String toString() => 'TestModel($id, $name)';
 }
 
 mixin TestAdapter<T extends DataModel<T>> on FirebaseDatabaseAdapter<T> {
@@ -24,11 +27,9 @@ mixin TestAdapter<T extends DataModel<T>> on FirebaseDatabaseAdapter<T> {
   );
 
   @override
-  String get database => 'fir-test-35fc4';
+  String get baseUrl =>
+      'https://flutter-data-extensions-default-rtdb.europe-west1.firebasedatabase.app/${read(accountProvider).localId}';
 
   @override
   String get idToken => read(accountProvider).idToken;
-
-  @override
-  String get basePath => '/datasync/${read(accountProvider).localId}/';
 }

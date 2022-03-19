@@ -4,19 +4,12 @@ import 'dart:convert';
 import 'package:flutter_data/flutter_data.dart';
 
 mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
-  String get database;
-
   String get idToken;
 
-  String get basePath;
-
   @override
-  String get baseUrl => 'https://$database.firebaseio.com/$basePath';
-
-  @override
-  FutureOr<Map<String, dynamic>> get defaultParams => <String, dynamic>{
+  FutureOr<Map<String, dynamic>> get defaultParams async => <String, dynamic>{
+        ...await super.defaultParams,
         'auth': idToken,
-        // TODO add defaults for all other params, overrideable
       };
 
   @override
@@ -48,7 +41,11 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     OnDataError<R>? onError,
   }) {
     OnData<R>? actualOnSuccess;
-    if (requestType == DataRequestType.save &&
+
+    if (requestType == DataRequestType.findAll) {
+      assert(onSuccess != null);
+      actualOnSuccess = _findAllOnSuccess(onSuccess!);
+    } else if (requestType == DataRequestType.save &&
         method == DataRequestMethod.POST) {
       assert(onSuccess != null);
       assert(body != null);
@@ -80,4 +77,18 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
       onError: onError,
     );
   }
+
+  OnData<R> _findAllOnSuccess<R>(OnData<R> onSuccess) => (rawData) {
+        if (rawData is Map<String, dynamic>) {
+          return onSuccess(<dynamic>[
+            for (final entry in rawData.entries)
+              if (entry.value is Map<String, dynamic>)
+                <String, dynamic>{...entry.value, 'id': entry.key}
+              else
+                entry.value,
+          ]);
+        } else {
+          return onSuccess(rawData);
+        }
+      };
 }

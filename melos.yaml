@@ -7,6 +7,10 @@ packages:
 scripts:
   get: dart pub global run melos exec -- dart pub get
 
+  build: dart pub global run melos exec -- dart run build_runner build
+
+  build:watch: dart pub global run melos exec -- dart run build_runner watch
+
   hooks:init: >-
     bash -c "echo -e
     '#!/bin/sh\nexec dart pub global run melos run hooks:run'

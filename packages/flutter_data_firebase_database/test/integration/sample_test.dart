@@ -30,5 +30,7 @@ void main() {
     print(savedData);
     final data = await testRepo.findOne(savedData.id!);
     print(data);
+    final allData = await testRepo.findAll();
+    print(allData);
   });
 }
