@@ -21,5 +21,6 @@ jobs:
     uses: Skycoder42/dart_test_tools/.github/workflows/dart.yml@main
     with:
       workingDirectory: packages/flutter_data_firebase_database
+      buildRunner: true
       unitTestPaths: test/unit
       integrationTestPaths: test/integration
