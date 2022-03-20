@@ -24,3 +24,8 @@ jobs:
       buildRunner: true
       unitTestPaths: test/unit
       integrationTestPaths: test/integration
+    secrets:
+      integrationTestEnvVars: >-
+        {
+          "FIREBASE_API_KEY": "${{ secrets.FIREBASE_API_KEY }}"
+        }
