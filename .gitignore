@@ -27,3 +27,6 @@ doc/api/
 # generated files
 *.g.dart
 main.data.dart
+
+#env files
+.env

@@ -6,12 +6,13 @@ import 'package:test/test.dart';
 import 'repositories/test.data.dart';
 import 'repositories/test_repository.dart';
 import 'setup/account_setup.dart';
+import 'setup/config_setup.dart';
 import 'setup/database_setup.dart';
 import 'setup/di_setup.dart';
 import 'setup/setup.dart';
 
-class _SampleTestSetup extends Setup with DiSetup, AccountSetup, DatabaseSetup {
-}
+class _SampleTestSetup extends Setup
+    with ConfigSetup, DiSetup, AccountSetup, DatabaseSetup {}
 
 void main() {
   final setup = _SampleTestSetup()..call();

@@ -6,7 +6,7 @@ import 'package:flutter_data_firebase_database/flutter_data_firebase_database.da
 import 'package:json_annotation/json_annotation.dart';
 
 import '../setup/account_setup.dart';
-import '../setup/config.dart';
+import '../setup/config_setup.dart';
 import '../setup/database_setup.dart';
 
 part 'test_repository.g.dart';
@@ -27,7 +27,7 @@ class TestModel with DataModel<TestModel> {
 mixin TestAdapter<T extends DataModel<T>> on FirebaseDatabaseAdapter<T> {
   @override
   String get baseUrl => Uri.https(
-        IntegrationTestConfig.databaseHost,
+        ConfigSetup.databaseHost,
         read(DatabaseSetup.databasePathProvider),
       ).toString();
 

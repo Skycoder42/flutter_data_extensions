@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 import 'account_setup.dart';
-import 'config.dart';
+import 'config_setup.dart';
 
 mixin DatabaseSetup on AccountSetup {
   static late final _incrementProvider = StateProvider((ref) => 0);
@@ -30,7 +30,7 @@ mixin DatabaseSetup on AccountSetup {
       final account = di.read(AccountSetup.accountProvider);
       final response = await http.delete(
         Uri.https(
-          IntegrationTestConfig.databaseHost,
+          ConfigSetup.databaseHost,
           '/${account.localId}.json',
           <String, String>{
             'auth': account.idToken,
