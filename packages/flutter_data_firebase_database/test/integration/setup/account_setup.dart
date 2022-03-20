@@ -1,23 +1,24 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_data/flutter_data.dart';
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
+import 'di_setup.dart';
 import 'models/account.dart';
-import 'setup.dart';
 
-class AccountSetup extends Setup {
+mixin AccountSetup on DiSetup {
   static late final accountProvider = StateProvider(
     (ref) => const Account(idToken: '', localId: ''),
   );
 
-  const AccountSetup(ProviderContainer di) : super(di);
-
   @override
-  FutureOr<void> setUpAll() async {
+  @mustCallSuper
+  Future<void> setUpAll() async {
+    await super.setUpAll();
+
     final accountResponse = await http.post(_createUri('signUp'));
     printOnFailure(accountResponse.body);
     expect(accountResponse.statusCode, 200);
@@ -28,14 +29,20 @@ class AccountSetup extends Setup {
   }
 
   @override
-  FutureOr<void> tearDownAll() async {
-    final deleteResponse = await http.post(
-      _createUri('delete'),
-      body:
-          json.encode(DeleteAccountPostModel(di.read(accountProvider).idToken)),
-    );
-    printOnFailure(deleteResponse.body);
-    expect(deleteResponse.statusCode, 200);
+  @mustCallSuper
+  Future<void> tearDownAll() async {
+    try {
+      final deleteResponse = await http.post(
+        _createUri('delete'),
+        body: json
+            .encode(DeleteAccountPostModel(di.read(accountProvider).idToken)),
+      );
+
+      printOnFailure(deleteResponse.body);
+      expect(deleteResponse.statusCode, 200);
+    } finally {
+      await super.tearDownAll();
+    }
   }
 
   Uri _createUri(String method) {

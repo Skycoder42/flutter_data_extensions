@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_data/flutter_data.dart';
 import 'package:test/test.dart';
 
@@ -7,27 +5,19 @@ import 'repositories/test.data.dart';
 import 'repositories/test_repository.dart';
 import 'setup/account_setup.dart';
 import 'setup/database_setup.dart';
+import 'setup/di_setup.dart';
 import 'setup/setup.dart';
 
-void main() {
-  final di = ProviderContainer(
-    overrides: [
-      configureRepositoryLocalStorage(
-        baseDirFn: () =>
-            Directory.systemTemp.createTemp().then((dir) => dir.path),
-      ),
-    ],
-  );
+class _SampleTestSetup extends Setup with DiSetup, AccountSetup, DatabaseSetup {
+}
 
-  Setup.setup([
-    AccountSetup(di),
-    DatabaseSetup(di),
-  ]);
+void main() {
+  final setup = _SampleTestSetup()..call();
 
   test('first test', () async {
-    await di.read(repositoryInitializerProvider(verbose: true).future);
+    await setup.di.read(repositoryInitializerProvider(verbose: true).future);
 
-    final testRepo = di.read(testModelsRepositoryProvider);
+    final testRepo = setup.di.read(testModelsRepositoryProvider);
 
     final savedData = await testRepo.save(TestModel(name: 'Hello World'));
     print(savedData);

@@ -1,41 +1,29 @@
 import 'dart:async';
-import 'package:flutter_data/flutter_data.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart' as test;
 
 abstract class Setup {
-  final ProviderContainer di;
+  @protected
+  @mustCallSuper
+  Future<void> setUpAll() => Future.value(null);
 
-  const Setup(this.di);
+  @protected
+  @mustCallSuper
+  Future<void> tearDownAll() => Future.value(null);
 
-  FutureOr<void> setUpAll() {}
-  FutureOr<void> tearDownAll() {}
+  @protected
+  @mustCallSuper
+  Future<void> setUp() => Future.value(null);
 
-  FutureOr<void> setUp() {}
-  FutureOr<void> tearDown() {}
+  @protected
+  @mustCallSuper
+  Future<void> tearDown() => Future.value(null);
 
-  static void setup(List<Setup> setups) {
-    test.setUpAll(() async {
-      for (final setup in setups) {
-        await setup.setUpAll();
-      }
-    });
+  void call() {
+    test.setUpAll(setUpAll);
+    test.tearDownAll(tearDownAll);
 
-    test.tearDownAll(() async {
-      for (final setup in setups.reversed) {
-        await setup.tearDownAll();
-      }
-    });
-
-    test.setUp(() async {
-      for (final setup in setups) {
-        await setup.setUp();
-      }
-    });
-
-    test.tearDown(() async {
-      for (final setup in setups.reversed) {
-        await setup.tearDown();
-      }
-    });
+    test.setUp(setUp);
+    test.tearDown(tearDown);
   }
 }
