@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.16.0 <3.0.0"
 
 dependencies:
-  flutter_data: ^1.2.0
+  flutter_data: ^1.2.1
   meta: ^1.7.0
 
 dev_dependencies:

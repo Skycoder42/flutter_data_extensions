@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_mixin
 
 import 'package:flutter_data/flutter_data.dart';
+// ignore: test_library_import
 import 'package:flutter_data_firebase_database/flutter_data_firebase_database.dart';
 import 'package:json_annotation/json_annotation.dart';
 
