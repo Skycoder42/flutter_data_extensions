@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_data/flutter_data.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
+import 'config.dart';
 import 'di_setup.dart';
 import 'models/account.dart';
 
@@ -45,17 +45,11 @@ mixin AccountSetup on DiSetup {
     }
   }
 
-  Uri _createUri(String method) {
-    final apiKey = Platform.environment['FIREBASE_API_KEY'];
-    expect(
-      apiKey,
-      allOf(isNotNull, isNotEmpty),
-      reason: 'FIREBASE_API_KEY environment variable must be set',
-    );
-    return Uri.https(
-      'identitytoolkit.googleapis.com',
-      '/v1/accounts:$method',
-      <String, String>{'key': apiKey!},
-    );
-  }
+  Uri _createUri(String method) => Uri.https(
+        'identitytoolkit.googleapis.com',
+        '/v1/accounts:$method',
+        <String, String>{
+          'key': IntegrationTestConfig.apiKey,
+        },
+      );
 }

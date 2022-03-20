@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 import 'account_setup.dart';
+import 'config.dart';
 
 mixin DatabaseSetup on AccountSetup {
   static late final _incrementProvider = StateProvider((ref) => 0);
@@ -29,7 +30,7 @@ mixin DatabaseSetup on AccountSetup {
       final account = di.read(AccountSetup.accountProvider);
       final response = await http.delete(
         Uri.https(
-          'flutter-data-extensions-default-rtdb.europe-west1.firebasedatabase.app',
+          IntegrationTestConfig.databaseHost,
           '/${account.localId}.json',
           <String, String>{
             'auth': account.idToken,
