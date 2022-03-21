@@ -12,7 +12,7 @@ import 'setup/di_setup.dart';
 import 'setup/setup.dart';
 
 class _SampleTestSetup extends Setup
-    with ConfigSetup, DiSetup, AccountSetup, DatabaseSetup {}
+    with DiSetup, ConfigSetup, AccountSetup, DatabaseSetup {}
 
 void main() {
   final setup = _SampleTestSetup()..call();

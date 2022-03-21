@@ -6,10 +6,9 @@ import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 import 'config_setup.dart';
-import 'di_setup.dart';
 import 'models/account.dart';
 
-mixin AccountSetup on DiSetup, ConfigSetup {
+mixin AccountSetup on ConfigSetup {
   static late final accountProvider = StateProvider(
     (ref) => const Account(idToken: '', localId: ''),
   );
@@ -49,7 +48,7 @@ mixin AccountSetup on DiSetup, ConfigSetup {
         'identitytoolkit.googleapis.com',
         '/v1/accounts:$method',
         <String, String>{
-          'key': ConfigSetup.apiKey,
+          'key': di.read(ConfigSetup.apiKeyProvider),
         },
       );
 }

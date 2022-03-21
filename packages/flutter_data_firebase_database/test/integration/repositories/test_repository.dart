@@ -27,7 +27,7 @@ class TestModel with DataModel<TestModel> {
 mixin TestAdapter<T extends DataModel<T>> on FirebaseDatabaseAdapter<T> {
   @override
   String get baseUrl => Uri.https(
-        ConfigSetup.databaseHost,
+        read(ConfigSetup.databaseHostProvider),
         read(DatabaseSetup.databasePathProvider),
       ).toString();
 

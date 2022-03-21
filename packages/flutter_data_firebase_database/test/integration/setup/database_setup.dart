@@ -30,7 +30,7 @@ mixin DatabaseSetup on AccountSetup {
       final account = di.read(AccountSetup.accountProvider);
       final response = await http.delete(
         Uri.https(
-          ConfigSetup.databaseHost,
+          di.read(ConfigSetup.databaseHostProvider),
           '/${account.localId}.json',
           <String, String>{
             'auth': account.idToken,

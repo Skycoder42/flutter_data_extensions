@@ -5,8 +5,10 @@ import 'package:universal_io/io.dart';
 import '../repositories/test.data.dart';
 import 'setup.dart';
 
+const _kIsWeb = identical(0, 0.0);
+
 mixin DiSetup on Setup {
-  late final Directory _testDir;
+  late final Directory? _testDir;
 
   late final ProviderContainer di;
 
@@ -15,11 +17,11 @@ mixin DiSetup on Setup {
   Future<void> setUpAll() async {
     await super.setUpAll();
 
-    _testDir = await Directory.systemTemp.createTemp();
+    _testDir = _kIsWeb ? null : await Directory.systemTemp.createTemp();
     di = ProviderContainer(
       overrides: [
         configureRepositoryLocalStorage(
-          baseDirFn: () => _testDir.path,
+          baseDirFn: () => _testDir?.path ?? '',
         ),
       ],
     );
@@ -32,7 +34,7 @@ mixin DiSetup on Setup {
       di.dispose();
       await di.pump();
 
-      await _testDir.delete(recursive: true);
+      await _testDir?.delete(recursive: true);
     } finally {
       await super.tearDownAll();
     }
