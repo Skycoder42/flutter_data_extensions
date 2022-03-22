@@ -21,6 +21,18 @@ class TestModel with DataModel<TestModel> {
   TestModel({this.id, required this.name});
 
   @override
+  bool operator ==(Object other) {
+    if (other is! TestModel) {
+      return false;
+    }
+
+    return id == other.id && name == other.name;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode;
+
+  @override
   String toString() => 'TestModel($id, $name)';
 }
 

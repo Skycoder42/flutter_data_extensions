@@ -7,20 +7,17 @@ import 'account_setup.dart';
 import 'config_setup.dart';
 
 mixin DatabaseSetup on AccountSetup {
-  static late final _incrementProvider = StateProvider((ref) => 0);
   static late final databasePathProvider = StateProvider(
     (ref) => '',
   );
 
   @override
   @mustCallSuper
-  Future<void> setUp() async {
-    await super.setUp();
+  Future<void> setUpAll() async {
+    await super.setUpAll();
 
-    final increment = di.read(_incrementProvider.notifier).state++;
     final account = di.read(AccountSetup.accountProvider);
-    di.read(databasePathProvider.notifier).state =
-        '/${account.localId}/_$increment';
+    di.read(databasePathProvider.notifier).state = '/${account.localId}';
   }
 
   @override

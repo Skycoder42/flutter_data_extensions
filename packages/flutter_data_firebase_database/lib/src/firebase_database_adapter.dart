@@ -25,6 +25,10 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
       '${super.urlForSave(id, params)}.json';
 
   @override
+  DataRequestMethod methodForSave(dynamic id, Map<String, dynamic> params) =>
+      id != null ? DataRequestMethod.PUT : DataRequestMethod.POST;
+
+  @override
   String urlForDelete(dynamic id, Map<String, dynamic> params) =>
       '${super.urlForDelete(id, params)}.json';
 
