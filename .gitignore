@@ -24,9 +24,5 @@ doc/api/
 *.iml
 .idea
 
-# generated files
-*.g.dart
-main.data.dart
-
 #env files
 .env

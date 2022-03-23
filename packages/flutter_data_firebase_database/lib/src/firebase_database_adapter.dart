@@ -3,12 +3,20 @@ import 'dart:convert';
 
 import 'package:flutter_data/flutter_data.dart';
 
+import 'queries/filter.dart';
+import 'queries/request_config.dart';
+
 mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   String get idToken;
+
+  RequestConfig? get defaultRequestConfig => null;
+
+  Filter? get defaultQueryFilter => null;
 
   @override
   FutureOr<Map<String, dynamic>> get defaultParams async => <String, dynamic>{
         ...await super.defaultParams,
+        ...?defaultRequestConfig?.asParams,
         'auth': idToken,
       };
 
@@ -44,16 +52,19 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     OnData<R>? onSuccess,
     OnDataError<R>? onError,
   }) {
+    Uri? actualUri;
     OnData<R>? actualOnSuccess;
     String? actualBody;
 
     switch (requestType) {
       case DataRequestType.findAll:
         assert(onSuccess != null);
+        actualUri = _uriWithDefaultQuery(uri);
         actualOnSuccess = _findAllOnSuccess(onSuccess!);
         break;
       case DataRequestType.findOne:
         assert(onSuccess != null);
+        actualUri = _uriWithDefaultQuery(uri);
         actualOnSuccess = _findOneOnSuccess(onSuccess!, uri);
         break;
       case DataRequestType.save:
@@ -72,7 +83,7 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     }
 
     return super.sendRequest(
-      uri,
+      actualUri ?? uri,
       method: method,
       headers: headers,
       omitDefaultParams: omitDefaultParams,
@@ -82,6 +93,17 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
       onSuccess: actualOnSuccess ?? onSuccess,
       onError: onError,
     );
+  }
+
+  Uri _uriWithDefaultQuery(Uri uri) {
+    if (!uri.queryParameters.containsKey(Filter.orderByKey)) {
+      final filter = defaultQueryFilter;
+      if (filter != null) {
+        return uri & filter;
+      }
+    }
+
+    return uri;
   }
 
   OnData<R> _findAllOnSuccess<R>(OnData<R> onSuccess) => (rawData) {

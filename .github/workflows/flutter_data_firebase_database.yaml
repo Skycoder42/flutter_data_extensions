@@ -22,6 +22,10 @@ jobs:
     with:
       workingDirectory: packages/flutter_data_firebase_database
       buildRunner: true
+      publishExclude: >-
+        [
+          "lib/src/.gitignore"
+        ]
       unitTestPaths: test/unit
       integrationTestPaths: test/integration
     secrets:
