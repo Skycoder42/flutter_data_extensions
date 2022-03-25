@@ -5,6 +5,22 @@ import 'package:flutter_data/flutter_data.dart';
 
 import 'queries/filter.dart';
 import 'queries/request_config.dart';
+import 'serialization/firebase_value_transformer.dart';
+import 'stream/database_event_stream.dart'
+    if (dart.library.html) 'stream/web/web_database_event_stream.dart';
+import 'stream/stream_all_controller.dart';
+
+class TransactionFailureException implements Exception {}
+
+class RawResponse {
+  final int statusCode;
+  final Object? data;
+  final Map<String, String> headers;
+
+  const RawResponse(this.statusCode, this.data, this.headers);
+}
+
+typedef TransactionFn<T extends DataModel<T>> = FutureOr<T?> Function(T? data);
 
 mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   String get idToken;
@@ -12,6 +28,93 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   RequestConfig? get defaultRequestConfig => null;
 
   Filter? get defaultQueryFilter => null;
+
+  Stream<List<T>> streamAll({
+    Map<String, dynamic>? params,
+    Map<String, String>? headers,
+    bool? syncLocal,
+    bool autoRenew = true,
+    OnDataError<List<T>>? onError,
+  }) =>
+      StreamAllController<T>(
+        createStream: () async {
+          final actualParams = await defaultParams & params;
+          return DatabaseEventStream(
+            uri: baseUrl.asUri / urlForFindAll(actualParams) & actualParams,
+            headers: await defaultHeaders & headers,
+          );
+        },
+        adapter: this,
+        syncLocal: syncLocal ?? false,
+        autoRenew: autoRenew,
+      ).stream;
+
+  Stream<T?> streamOne(
+    String id, {
+    Map<String, dynamic>? params,
+    Map<String, String>? headers,
+    OnDataError<T?>? onError,
+  }) =>
+      const Stream.empty();
+
+  // Future<T?> transaction(
+  //   Object id,
+  //   TransactionFn<T> transaction, {
+  //   Map<String, dynamic>? params,
+  //   Map<String, String>? headers,
+  //   OnDataError<T?>? onError,
+  // }) async {
+  //   final actualParams = await defaultParams & params;
+  //   // final actualHeaders =
+  //   //     await defaultHeaders & headers & ETagConstants.requestETagHeaders;
+
+  //   final rawResponse = await _sendRawRequest(
+  //     baseUrl.asUri / urlForFindOne(id, actualParams) & actualParams,
+  //     method: methodForFindOne(id, actualParams),
+  //     headers: headers,
+  //     onError: onError,
+  //   );
+
+  //   if (rawResponse == null) {
+  //     throw UnimplementedError(); // TODO
+  //   }
+
+  //   if (rawResponse.statusCode != 200) {
+  //     throw UnimplementedError(); // TODO
+  //   }
+
+  //   final eTag = rawResponse.headers[ETagConstants.eTagHeaderName] ??
+  //       ETagConstants.nullETag;
+  //   final model = deserialize(rawResponse.data).model;
+
+  //   final updatedModel = await transaction(model);
+  //   if (updatedModel != null) {
+  //     await save(
+  //       updatedModel,
+  //       remote: true,
+  //       headers: {ETagConstants.ifMatchHeaderName: eTag},
+  //       onError: onError ?? onTransactionError,
+  //       // TODO params, headers, ...
+  //     );
+  //   } else {
+  //     await delete(
+  //       id,
+  //       remote: true,
+  //       headers: {ETagConstants.ifMatchHeaderName: eTag},
+  //       onError: onError ?? onTransactionError,
+  //       // TODO params, headers, ...
+  //     );
+  //   }
+
+  //   return updatedModel;
+  // }
+
+  // FutureOr<T?> onTransactionError(DataException error) {
+  //   if (error.statusCode == 412) {
+  //     throw TransactionFailureException();
+  //   }
+  //   return onError(error);
+  // }
 
   @override
   FutureOr<Map<String, dynamic>> get defaultParams async => <String, dynamic>{
@@ -106,45 +209,26 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     return uri;
   }
 
-  OnData<R> _findAllOnSuccess<R>(OnData<R> onSuccess) => (rawData) {
-        if (rawData is Map<String, dynamic>) {
-          return onSuccess(<dynamic>[
-            for (final entry in rawData.entries)
-              if (entry.value is Map<String, dynamic>)
-                <String, dynamic>{...entry.value, 'id': entry.key}
-              else
-                entry.value,
-          ]);
-        } else {
-          return onSuccess(rawData);
-        }
-      };
+  OnData<R> _findAllOnSuccess<R>(OnData<R> onSuccess) =>
+      (rawData) => onSuccess(FirebaseValueTransformer.transformAll(rawData));
 
-  OnData<R> _findOneOnSuccess<R>(OnData<R> onSuccess, Uri uri) => (rawData) {
-        if (rawData is Map<String, dynamic>) {
-          return onSuccess(<String, dynamic>{
-            ...rawData,
-            'id': _idFromUrl(uri),
-          });
-        } else {
-          return onSuccess(rawData);
-        }
-      };
+  OnData<R> _findOneOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
+      (rawData) => onSuccess(
+            FirebaseValueTransformer.transformOne(rawData, _idFromUrl(uri)),
+          );
 
   OnData<R> _savePostOnSuccess<R>(OnData<R> onSuccess, String requestBody) =>
-      (rawData) {
-        if (rawData is Map<String, dynamic> &&
-            rawData.keys.length == 1 &&
-            rawData.keys.contains('name')) {
-          final jsonRequest = json.decode(requestBody) as Map<String, dynamic>;
-          return onSuccess(<String, dynamic>{
-            ...jsonRequest,
-            'id': rawData['name'],
-          });
-        } else {
-          return onSuccess(rawData);
-        }
-      };
+      (rawData) => onSuccess(
+            FirebaseValueTransformer.transformSaveCreate(rawData, requestBody),
+          );
+
+  OnData<R> _savePutOrPatchOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
+      (rawData) => onSuccess(
+            FirebaseValueTransformer.transformSaveUpdate(
+              rawData,
+              _idFromUrl(uri),
+            ),
+          );
 
   String _savePutOrPatchBody(String body) {
     final dynamic jsonData = json.decode(body);
@@ -156,19 +240,63 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     }
   }
 
-  OnData<R> _savePutOrPatchOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
-      (rawData) {
-        if (rawData is Map<String, dynamic>) {
-          return onSuccess(<String, dynamic>{
-            ...rawData,
-            'id': _idFromUrl(uri),
-          });
-        } else {
-          return onSuccess(rawData);
-        }
-      };
-
   static late final _findOneUriIdRegExp = RegExp(r'\.json$');
-  String _idFromUrl(Uri uri) =>
+  static String _idFromUrl(Uri uri) =>
       uri.pathSegments.last.replaceAll(_findOneUriIdRegExp, '');
+
+  // Future<RawResponse?> _sendRawRequest(
+  //   Uri uri, {
+  //   DataRequestMethod method = DataRequestMethod.GET,
+  //   Map<String, String>? headers,
+  //   String? body,
+  //   OnDataError<void>? onError,
+  // }) async {
+  //   http.Response? response;
+  //   Object? data;
+  //   Object? error;
+  //   StackTrace? stackTrace;
+
+  //   try {
+  //     final request = http.Request(method.name, uri);
+  //     request.headers.addAll(headers ?? const {});
+  //     if (body != null) {
+  //       request.body = body;
+  //     }
+  //     final stream = await httpClient.send(request);
+  //     response = await http.Response.fromStream(stream);
+  //   } catch (err, stack) {
+  //     error = err;
+  //     stackTrace = stack;
+  //   } finally {
+  //     httpClient.close();
+  //   }
+
+  //   final code = response?.statusCode;
+  //   final responseHeaders = response?.headers ?? const {};
+  //   try {
+  //     if (response?.body.isNotEmpty ?? false) {
+  //       data = json.decode(response!.body);
+  //     }
+  //   } on FormatException catch (e) {
+  //     error = e;
+  //   }
+
+  //   if (error == null && code != null && code >= 200 && code < 300) {
+  //     return RawResponse(code, data, responseHeaders);
+  //   } else if (error != null) {
+  //     final e = DataException(
+  //       error,
+  //       stackTrace: stackTrace,
+  //       statusCode: code,
+  //     );
+  //     await (onError ?? this.onError).call(e);
+  //     return null;
+  //   } else {
+  //     return RawResponse(
+  //       code ?? 400,
+  //       data,
+  //       responseHeaders,
+  //     );
+  //   }
+  // }
 }
