@@ -5,13 +5,15 @@ import 'package:rxdart/rxdart.dart';
 
 import '../database_event.dart';
 
-class WebDatabaseEventStream extends Stream<DatabaseEvent> {
+class DatabaseEventStream extends Stream<DatabaseEvent> {
   final Uri uri;
   final Map<String, String>? headers;
+  final dynamic client;
 
-  WebDatabaseEventStream({
+  DatabaseEventStream({
     required this.uri,
     this.headers,
+    this.client,
   });
 
   @override

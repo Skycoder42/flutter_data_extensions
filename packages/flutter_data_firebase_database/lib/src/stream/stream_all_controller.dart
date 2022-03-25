@@ -22,9 +22,14 @@ class StreamAllController<T extends DataModel<T>> {
   final bool autoRenew;
   final UnsupportedEventCb? onUnsupportedEvent;
 
-  late final StreamController<List<T>> _streamController;
   // ignore: cancel_subscriptions
   StreamSubscription<void>? _databaseEventSub;
+  late final _streamController = StreamController<List<T>>(
+    onListen: _onListen,
+    onPause: _onPause,
+    onResume: _onResume,
+    onCancel: _onCancel,
+  );
 
   var _streamState = <T>[];
 
@@ -34,31 +39,40 @@ class StreamAllController<T extends DataModel<T>> {
     this.syncLocal = false,
     this.autoRenew = true,
     this.onUnsupportedEvent,
-  }) {
-    _streamController = StreamController<List<T>>(
-      onListen: _onListen,
-      onCancel: _onCancel,
-    );
-  }
+  });
 
   Stream<List<T>> get stream => _streamController.stream;
 
-  Future<void> _onListen() async {
-    final stream = await createStream();
-    // pass _onEvent as map instead of listen to handle asynchronous processing
-    _databaseEventSub = stream.listen(
-      _onEvent,
-      onError: _streamController.addError,
-      onDone: _streamController.close,
-      // If desired, errors will cancel via the controller
-      cancelOnError: false,
-    );
+  void _onListen() {
+    _databaseEventSub = Stream.fromFuture(createStream())
+        .asyncExpand((stream) => stream)
+        .listen(
+          _onEvent,
+          onError: _streamController.addError,
+          onDone: _streamController.close,
+          // If desired, errors will cancel via the controller
+          cancelOnError: false,
+        );
   }
 
-  FutureOr<void> _onCancel() {
-    final sub = _databaseEventSub;
-    _databaseEventSub = null;
-    return sub?.cancel();
+  void _onPause() {
+    _databaseEventSub?.pause();
+  }
+
+  void _onResume() {
+    _databaseEventSub?.resume();
+  }
+
+  Future<void> _onCancel({bool closeController = true}) async {
+    try {
+      final sub = _databaseEventSub;
+      _databaseEventSub = null;
+      await sub?.cancel();
+    } finally {
+      if (closeController && !_streamController.isClosed) {
+        await _streamController.close();
+      }
+    }
   }
 
   void _onEvent(DatabaseEvent event) => event.when(
@@ -131,8 +145,8 @@ class StreamAllController<T extends DataModel<T>> {
 
   void _authRevoked() {
     if (autoRenew) {
-      _onCancel(); // TODO handle errors?
-      _onListen(); // TODO handle async
+      _onCancel(closeController: false).catchError(_streamController.addError);
+      _onListen();
     } else {
       _streamController.addError(AuthenticationRevoked(), StackTrace.current);
     }

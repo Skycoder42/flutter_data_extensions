@@ -43,11 +43,11 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
     switch (event.event) {
       case 'put':
         return DatabaseEvent.put(
-          DatabaseEventData.fromRawJson(event.data ?? ''),
+          DatabaseEventData.fromRawJson(event.data!),
         );
       case 'patch':
         return DatabaseEvent.patch(
-          DatabaseEventData.fromRawJson(event.data ?? ''),
+          DatabaseEventData.fromRawJson(event.data!),
         );
       case 'keep-alive':
         return const DatabaseEvent.keepAlive();

@@ -7,7 +7,7 @@ import 'queries/filter.dart';
 import 'queries/request_config.dart';
 import 'serialization/firebase_value_transformer.dart';
 import 'stream/database_event_stream.dart'
-    if (dart.library.html) 'stream/web/web_database_event_stream.dart';
+    if (dart.library.html) 'stream/web/database_event_stream.dart';
 import 'stream/stream_all_controller.dart';
 
 class TransactionFailureException implements Exception {}
@@ -34,6 +34,7 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     Map<String, String>? headers,
     bool? syncLocal,
     bool autoRenew = true,
+    UnsupportedEventCb? onUnsupportedEvent,
     OnDataError<List<T>>? onError,
   }) =>
       StreamAllController<T>(
@@ -42,11 +43,13 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
           return DatabaseEventStream(
             uri: baseUrl.asUri / urlForFindAll(actualParams) & actualParams,
             headers: await defaultHeaders & headers,
+            client: httpClient,
           );
         },
         adapter: this,
         syncLocal: syncLocal ?? false,
         autoRenew: autoRenew,
+        onUnsupportedEvent: onUnsupportedEvent,
       ).stream;
 
   Stream<T?> streamOne(
