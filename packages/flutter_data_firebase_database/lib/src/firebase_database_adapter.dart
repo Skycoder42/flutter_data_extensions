@@ -221,12 +221,12 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
 
   OnData<R> _savePostOnSuccess<R>(OnData<R> onSuccess, String requestBody) =>
       (rawData) => onSuccess(
-            FirebaseValueTransformer.transformSaveCreate(rawData, requestBody),
+            FirebaseValueTransformer.transformCreated(rawData, requestBody),
           );
 
   OnData<R> _savePutOrPatchOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
       (rawData) => onSuccess(
-            FirebaseValueTransformer.transformSaveUpdate(
+            FirebaseValueTransformer.transformOne(
               rawData,
               _idFromUrl(uri),
             ),
