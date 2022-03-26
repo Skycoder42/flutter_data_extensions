@@ -25,13 +25,7 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
     void Function()? onDone,
     bool? cancelOnError,
   }) =>
-      Stream.fromFuture(
-        EventSource.connect(
-          uri,
-          headers: headers,
-          client: client,
-        ),
-      )
+      Stream.fromFuture(createEventSource())
           .asyncExpand((eventSource) => eventSource)
           .map(_mapEventToDatabaseEvent)
           .listen(
@@ -40,6 +34,13 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
             onDone: onDone,
             cancelOnError: cancelOnError,
           );
+
+  @visibleForTesting
+  Future<EventSource> createEventSource() => EventSource.connect(
+        uri,
+        headers: headers,
+        client: client,
+      );
 
   static DatabaseEvent _mapEventToDatabaseEvent(Event event) {
     switch (event.event) {
