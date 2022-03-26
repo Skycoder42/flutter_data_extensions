@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
+@internal
 abstract class FirebaseValueTransformer {
   FirebaseValueTransformer._();
 

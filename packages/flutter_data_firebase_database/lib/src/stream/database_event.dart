@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'database_event.freezed.dart';
 part 'database_event.g.dart';
 
+@internal
 @freezed
 class DatabaseEventData with _$DatabaseEventData {
   const factory DatabaseEventData({
@@ -21,6 +22,7 @@ class DatabaseEventData with _$DatabaseEventData {
       );
 }
 
+@internal
 @freezed
 class DatabaseEvent with _$DatabaseEvent {
   static const putEvent = 'put';

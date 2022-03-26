@@ -1,3 +1,6 @@
+import 'package:meta/meta.dart';
+
+@internal
 abstract class ETagConstants {
   const ETagConstants._(); // coverage:ignore-line
 

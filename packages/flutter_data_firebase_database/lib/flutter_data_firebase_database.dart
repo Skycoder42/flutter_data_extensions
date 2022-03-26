@@ -4,3 +4,6 @@ export 'src/queries/format_mode.dart';
 export 'src/queries/request_config.dart';
 export 'src/queries/timeout.dart';
 export 'src/queries/write_size_limit.dart';
+export 'src/stream/errors/authentication_revoked.dart';
+export 'src/stream/errors/remote_cancellation.dart';
+export 'src/stream/stream_all_controller.dart' hide StreamAllController;

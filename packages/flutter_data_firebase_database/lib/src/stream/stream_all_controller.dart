@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_data/flutter_data.dart';
+import 'package:meta/meta.dart';
 
-import '../../flutter_data_firebase_database.dart';
+import '../firebase_database_adapter.dart';
 import '../serialization/firebase_value_transformer.dart';
 import 'database_event.dart';
 import 'database_event_stream.dart';
@@ -11,6 +12,7 @@ import 'errors/remote_cancellation.dart';
 
 typedef UnsupportedEventCb = void Function(String event, String? path);
 
+@internal
 class StreamAllController<T extends DataModel<T>> {
   static const _rootPath = '/';
 

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../database_event.dart';
 
+@internal
 class DatabaseEventStream extends Stream<DatabaseEvent> {
   final Uri uri;
   final Map<String, String>? headers;
