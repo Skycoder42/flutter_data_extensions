@@ -6,9 +6,9 @@ import 'package:meta/meta.dart';
 import '../firebase_database_adapter.dart';
 import '../serialization/firebase_value_transformer.dart';
 import 'database_event.dart';
-import 'database_event_stream.dart';
 import 'errors/authentication_revoked.dart';
 import 'errors/remote_cancellation.dart';
+import 'event_stream/database_event_stream.dart';
 
 typedef UnsupportedEventCb = void Function(String event, String? path);
 

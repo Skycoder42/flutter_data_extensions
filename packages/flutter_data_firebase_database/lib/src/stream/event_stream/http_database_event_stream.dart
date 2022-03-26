@@ -4,7 +4,7 @@ import 'package:eventsource/eventsource.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
-import 'database_event.dart';
+import '../database_event.dart';
 
 @internal
 class DatabaseEventStream extends Stream<DatabaseEvent> {

@@ -6,8 +6,7 @@ import 'package:flutter_data/flutter_data.dart';
 import 'queries/filter.dart';
 import 'queries/request_config.dart';
 import 'serialization/firebase_value_transformer.dart';
-import 'stream/database_event_stream.dart'
-    if (dart.library.html) 'stream/web/database_event_stream.dart';
+import 'stream/event_stream/database_event_stream.dart';
 import 'stream/stream_all_controller.dart';
 
 class TransactionFailureException implements Exception {}
