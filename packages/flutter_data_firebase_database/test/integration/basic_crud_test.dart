@@ -113,7 +113,7 @@ void main() {
       expect(localEntry, isNotNull);
       await localEntry!.delete();
 
-      final removedEntry = await setup.repository.findOne('know-id');
+      final removedEntry = await setup.repository.findOne(knownId);
       expect(removedEntry, isNull);
     });
   });
