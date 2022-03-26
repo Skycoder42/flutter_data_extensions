@@ -31,6 +31,7 @@ mixin DiSetup on Setup {
   @mustCallSuper
   Future<void> tearDownAll() async {
     try {
+      await di.read(hiveLocalStorageProvider).hive.close();
       di.dispose();
       await di.pump();
 
