@@ -36,7 +36,7 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
           );
 
   @visibleForTesting
-  Future<EventSource> createEventSource() => EventSource.connect(
+  Future<Stream<Event>> createEventSource() => EventSource.connect(
         uri,
         headers: headers,
         client: client,
