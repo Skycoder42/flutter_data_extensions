@@ -8,7 +8,6 @@ import '../serialization/firebase_value_transformer.dart';
 import 'database_event.dart';
 import 'errors/authentication_revoked.dart';
 import 'errors/remote_cancellation.dart';
-import 'event_stream/database_event_stream.dart';
 
 typedef UnsupportedEventCb = void Function(String event, String? path);
 
@@ -18,7 +17,7 @@ class StreamAllController<T extends DataModel<T>> {
 
   static final _subPathRegexp = RegExp(r'^\/([^\/]+)$');
 
-  final Future<DatabaseEventStream> Function() createStream;
+  final Future<Stream<DatabaseEvent>> Function() createStream;
   final FirebaseDatabaseAdapter<T> adapter;
   final bool syncLocal;
   final bool autoRenew;
@@ -163,9 +162,13 @@ class StreamAllController<T extends DataModel<T>> {
     final dataIndex =
         _streamState.indexWhere((element) => element.id == data.id);
     if (dataIndex == -1) {
-      _streamState.add(data);
+      _streamState = [..._streamState, data];
     } else {
-      _streamState[dataIndex] = data;
+      _streamState = [
+        ..._streamState.sublist(0, dataIndex),
+        data,
+        ..._streamState.sublist(dataIndex + 1),
+      ];
     }
 
     if (addEvent) {
@@ -175,7 +178,9 @@ class StreamAllController<T extends DataModel<T>> {
 
   void _removeState(Object id, [bool addEvent = true]) {
     adapter.delete(id, remote: false);
-    _streamState.removeWhere((element) => element.id == id);
+    _streamState = [
+      ..._streamState.where((element) => element.id != id),
+    ];
     if (addEvent) {
       _streamController.add(_streamState);
     }
