@@ -1,3 +1,5 @@
+@TestOn('!browser')
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -17,8 +19,7 @@ class MockStreamedResponse extends Mock implements StreamedResponse {}
 class TestableDatabaseEventStream extends DatabaseEventStream {
   final Stream<Event> eventSource;
 
-  TestableDatabaseEventStream(this.eventSource)
-      : super(uri: Uri.http('localhost', '/'));
+  TestableDatabaseEventStream(this.eventSource) : super(uri: Uri());
 
   @override
   Future<Stream<Event>> createEventSource() async => eventSource;
@@ -116,7 +117,7 @@ void main() {
     test('handles multiple events', () {
       final events = [
         Event(event: 'auth_revoked'),
-        Event(event: 'cancel', data: 'abort'),
+        Event(event: 'cancel'),
         Event(event: 'keep-alive'),
         Event(event: 'auth_revoked'),
       ];
@@ -126,7 +127,7 @@ void main() {
         sut,
         emitsInOrder(<dynamic>[
           const DatabaseEvent.authRevoked(),
-          const DatabaseEvent.cancel('abort'),
+          const DatabaseEvent.cancel(''),
           const DatabaseEvent.keepAlive(),
           const DatabaseEvent.authRevoked(),
           emitsDone,

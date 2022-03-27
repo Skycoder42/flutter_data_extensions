@@ -25,7 +25,7 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    final eventSource = EventSource(uri.toString());
+    final eventSource = createEventSource();
 
     final putStream =
         eventSource.on[DatabaseEvent.putEvent].cast<MessageEvent>().map(
@@ -47,7 +47,7 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
 
     final cancelStream = eventSource.on[DatabaseEvent.cancelEvent]
         .cast<MessageEvent>()
-        .map((event) => DatabaseEvent.cancel(event.data as String));
+        .map((event) => DatabaseEvent.cancel(event.data as String? ?? ''));
 
     final authRevokedStream = eventSource.on[DatabaseEvent.authRevokedEvent]
         .cast<MessageEvent>()
@@ -73,4 +73,7 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
           cancelOnError: cancelOnError,
         );
   }
+
+  @visibleForTesting
+  EventSource createEventSource() => EventSource(uri.toString());
 }
