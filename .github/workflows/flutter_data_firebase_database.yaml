@@ -29,6 +29,7 @@ jobs:
       unitTestPaths: test/unit
       coverageExclude: >-
         "**/*.freezed.dart"
+        "**/*.g.dart"
       integrationTestPaths: test/integration
     secrets:
       integrationTestEnvVars: |
