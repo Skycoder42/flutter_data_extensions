@@ -1,3 +1,5 @@
+@TestOn('browser')
+
 import 'dart:convert';
 import 'dart:html';
 
