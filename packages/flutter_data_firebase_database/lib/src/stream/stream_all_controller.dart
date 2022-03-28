@@ -32,7 +32,7 @@ class StreamAllController<T extends DataModel<T>> {
     onCancel: _onCancel,
   );
 
-  var _streamState = <T>[];
+  List<T> _streamState = const [];
 
   StreamAllController({
     required this.createStream,
@@ -91,11 +91,16 @@ class StreamAllController<T extends DataModel<T>> {
     if (syncLocal) {
       adapter.clear();
     }
-    final deserialized = adapter.deserialize(
-      FirebaseValueTransformer.transformAll(data.data),
-    );
 
-    _replaceState(deserialized.models);
+    if (data.data != null) {
+      final deserialized = adapter.deserialize(
+        FirebaseValueTransformer.transformAll(data.data),
+      );
+
+      _replaceState(deserialized.models);
+    } else {
+      _replaceState(const []);
+    }
   }
 
   void _update(DatabaseEventData data) {
@@ -107,7 +112,9 @@ class StreamAllController<T extends DataModel<T>> {
         );
         _updateState(deserialized.model!);
       } else {
-        _removeState(match[1]!);
+        final id = match[1]!;
+        adapter.delete(id, remote: false);
+        _removeState(id);
       }
     } else {
       onUnsupportedEvent?.call('put', data.path);
@@ -125,7 +132,10 @@ class StreamAllController<T extends DataModel<T>> {
       eventData.entries
           .where((entry) => entry.value == null)
           .map((entry) => entry.key)
-          .forEach((key) => _removeState(key, false));
+          .forEach((id) {
+        adapter.delete(id, remote: false);
+        _removeState(id, false);
+      });
     }
 
     final deserialized = adapter.deserialize(
@@ -135,6 +145,7 @@ class StreamAllController<T extends DataModel<T>> {
     for (final model in deserialized.models) {
       _updateState(model, false);
     }
+
     _streamController.add(_streamState);
   }
 
@@ -154,22 +165,22 @@ class StreamAllController<T extends DataModel<T>> {
   }
 
   void _replaceState(List<T> newState) {
-    _streamState = newState;
+    _streamState = List.unmodifiable(newState);
     _streamController.add(_streamState);
   }
 
   void _updateState(T data, [bool addEvent = true]) {
-    final dataIndex =
-        _streamState.indexWhere((element) => element.id == data.id);
-    if (dataIndex == -1) {
-      _streamState = [..._streamState, data];
-    } else {
-      _streamState = [
-        ..._streamState.sublist(0, dataIndex),
-        data,
-        ..._streamState.sublist(dataIndex + 1),
-      ];
+    var added = false;
+    T dataAsAdded() {
+      added = true;
+      return data;
     }
+
+    _streamState = List.unmodifiable(<T>[
+      for (final value in _streamState)
+        if (!added && value.id == data.id) dataAsAdded() else value,
+      if (!added) data,
+    ]);
 
     if (addEvent) {
       _streamController.add(_streamState);
@@ -177,10 +188,10 @@ class StreamAllController<T extends DataModel<T>> {
   }
 
   void _removeState(Object id, [bool addEvent = true]) {
-    adapter.delete(id, remote: false);
-    _streamState = [
-      ..._streamState.where((element) => element.id != id),
-    ];
+    _streamState = List.unmodifiable(<T>[
+      for (final value in _streamState)
+        if (value.id != id) value,
+    ]);
     if (addEvent) {
       _streamController.add(_streamState);
     }
