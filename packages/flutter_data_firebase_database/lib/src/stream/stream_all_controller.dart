@@ -128,28 +128,25 @@ class StreamAllController<T extends DataModel<T>> {
     }
 
     final eventData = data.data;
+    var deletedIds = const <String>[];
     if (eventData is Map<String, dynamic>) {
-      eventData.entries
+      deletedIds = eventData.entries
           .where((entry) => entry.value == null)
           .map((entry) => entry.key)
-          .forEach((id) {
+          .toList(growable: false);
+      for (final id in deletedIds) {
         adapter.delete(id, remote: false);
-        _removeState(id, false);
-      });
+      }
     }
 
     final deserialized = adapter.deserialize(
       FirebaseValueTransformer.transformAll(data.data),
     );
 
-    for (final model in deserialized.models) {
-      _updateState(model, false);
-    }
-
-    _streamController.add(_streamState);
+    _patchState(deserialized.models, deletedIds);
   }
 
-  void _keepAlive() => onUnsupportedEvent?.call('keep-alive', null);
+  void _keepAlive() {}
 
   void _cancel(String reason) {
     _streamController.addError(RemoteCancellation(reason));
@@ -169,7 +166,7 @@ class StreamAllController<T extends DataModel<T>> {
     _streamController.add(_streamState);
   }
 
-  void _updateState(T data, [bool addEvent = true]) {
+  void _updateState(T data) {
     var added = false;
     T dataAsAdded() {
       added = true;
@@ -182,18 +179,32 @@ class StreamAllController<T extends DataModel<T>> {
       if (!added) data,
     ]);
 
-    if (addEvent) {
-      _streamController.add(_streamState);
-    }
+    _streamController.add(_streamState);
   }
 
-  void _removeState(Object id, [bool addEvent = true]) {
+  void _removeState(Object id) {
     _streamState = List.unmodifiable(<T>[
       for (final value in _streamState)
         if (value.id != id) value,
     ]);
-    if (addEvent) {
-      _streamController.add(_streamState);
-    }
+
+    _streamController.add(_streamState);
+  }
+
+  void _patchState(List<T> modified, List<String> deleted) {
+    final modifiedPairs = {
+      for (final value in modified) value.id: value,
+    };
+
+    _streamState = List.unmodifiable(<T>[
+      for (final value in _streamState)
+        if (modifiedPairs.containsKey(value.id))
+          modifiedPairs.remove(value.id)!
+        else if (!deleted.contains(value.id))
+          value,
+      ...modifiedPairs.values,
+    ]);
+
+    _streamController.add(_streamState);
   }
 }

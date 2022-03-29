@@ -41,6 +41,17 @@ void main() {
           {'id': 'key2', 'c': 3},
         ]);
       });
+
+      test('removes null values from map', () {
+        final data = {
+          'key1': 1,
+          'key2': null,
+        };
+
+        final result = FirebaseValueTransformer.transformAll(data);
+
+        expect(result, [1]);
+      });
     });
 
     group('transformOne', () {
