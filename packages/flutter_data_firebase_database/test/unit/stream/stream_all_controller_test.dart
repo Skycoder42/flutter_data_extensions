@@ -850,45 +850,22 @@ void main() {
       expect(sut.stream, emitsDone);
     });
 
-    test('forwards pause, resume and cancel to original stream', () async {
-      var paused = false;
-      var resumed = false;
+    test('forwards cancel to original stream', () async {
       var cancelled = false;
       final testController = StreamController<DatabaseEvent>(
-        onPause: () => paused = true,
-        onResume: () => resumed = true,
         onCancel: () => cancelled = true,
       );
+      addTearDown(testController.close);
 
       final sut = createSut(testController.stream);
       final sub = sut.stream.listen(null);
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
-      expect(paused, isFalse);
-      expect(resumed, isFalse);
-      expect(cancelled, isFalse);
-
-      sub.pause();
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      expect(paused, isTrue);
-      expect(resumed, isFalse);
-      expect(cancelled, isFalse);
-
-      sub.resume();
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      expect(paused, isTrue);
-      expect(resumed, isTrue);
       expect(cancelled, isFalse);
 
       await sub.cancel();
 
-      expect(paused, isTrue);
-      expect(resumed, isTrue);
       expect(cancelled, isTrue);
-
-      await testController.close();
     });
   });
 }

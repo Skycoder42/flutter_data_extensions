@@ -27,8 +27,8 @@ class StreamAllController<T extends DataModel<T>> {
   StreamSubscription<void>? _databaseEventSub;
   late final _streamController = StreamController<List<T>>(
     onListen: _onListen,
-    onPause: _onPause,
-    onResume: _onResume,
+    // do not pause event source, as it might be a broadcast and
+    // we do not want to miss any events
     onCancel: _onCancel,
   );
 
@@ -56,14 +56,6 @@ class StreamAllController<T extends DataModel<T>> {
           // If desired, errors will cancel via the controller
           cancelOnError: false,
         );
-  }
-
-  void _onPause() {
-    _databaseEventSub?.pause();
-  }
-
-  void _onResume() {
-    _databaseEventSub?.resume();
   }
 
   Future<void> _onCancel({bool closeController = true}) async {

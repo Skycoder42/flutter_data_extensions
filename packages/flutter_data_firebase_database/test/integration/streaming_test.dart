@@ -8,6 +8,8 @@ import 'package:test/test.dart';
 import 'repositories/test_repository.dart';
 import 'setup/test_repository_setup.dart';
 
+const bool _kIsWeb = identical(0, 0.0);
+
 void main() {
   final setup = TestRepositorySetup()..call();
 
@@ -28,6 +30,9 @@ void main() {
         headers: await sut.defaultHeaders,
         body: json.encode(sut.serialize(model)),
       );
+      if (_kIsWeb) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
     }
 
     Future<void> _delete(String id) async {
@@ -40,6 +45,9 @@ void main() {
         // ignore: invalid_use_of_protected_member
         headers: await sut.defaultHeaders,
       );
+      if (_kIsWeb) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
     }
 
     test('[ASSERT] _put and _delete helpers do not update local state',
@@ -111,6 +119,9 @@ void main() {
         await _delete('_3');
         await _delete('_2');
         final posted = await sut.save(TestModel(name: 'posted'));
+        if (_kIsWeb) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
         await sut.delete(posted);
       });
 
