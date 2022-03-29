@@ -47,8 +47,10 @@ class StreamAllController<T extends DataModel<T>> {
   void _onListen() {
     _databaseEventSub = Stream.fromFuture(createStream())
         .asyncExpand((stream) => stream)
+        .asyncMap(_onEvent)
         .listen(
-          _onEvent,
+          // use asyncMap to listen to ensure events are processed sequentially
+          null,
           onError: _streamController.addError,
           onDone: _streamController.close,
           // If desired, errors will cancel via the controller
@@ -76,7 +78,7 @@ class StreamAllController<T extends DataModel<T>> {
     }
   }
 
-  void _onEvent(DatabaseEvent event) => event.when(
+  FutureOr<void> _onEvent(DatabaseEvent event) => event.when(
         put: _put,
         patch: _patch,
         keepAlive: _keepAlive,
@@ -84,12 +86,12 @@ class StreamAllController<T extends DataModel<T>> {
         authRevoked: _authRevoked,
       );
 
-  void _put(DatabaseEventData data) =>
+  Future<void> _put(DatabaseEventData data) =>
       data.path == _rootPath ? _reset(data) : _update(data);
 
-  void _reset(DatabaseEventData data) {
+  Future<void> _reset(DatabaseEventData data) async {
     if (syncLocal) {
-      adapter.clear();
+      await adapter.clear();
     }
 
     if (data.data != null) {
@@ -103,7 +105,7 @@ class StreamAllController<T extends DataModel<T>> {
     }
   }
 
-  void _update(DatabaseEventData data) {
+  Future<void> _update(DatabaseEventData data) async {
     final match = _subPathRegexp.firstMatch(data.path);
     if (match != null) {
       if (data.data != null) {
@@ -113,7 +115,7 @@ class StreamAllController<T extends DataModel<T>> {
         _updateState(deserialized.model!);
       } else {
         final id = match[1]!;
-        adapter.delete(id, remote: false);
+        await adapter.delete(id, remote: false);
         _removeState(id);
       }
     } else {
@@ -121,7 +123,7 @@ class StreamAllController<T extends DataModel<T>> {
     }
   }
 
-  void _patch(DatabaseEventData data) {
+  Future<void> _patch(DatabaseEventData data) async {
     if (data.path != _rootPath) {
       onUnsupportedEvent?.call('patch', data.path);
       return;
@@ -135,7 +137,7 @@ class StreamAllController<T extends DataModel<T>> {
           .map((entry) => entry.key)
           .toList(growable: false);
       for (final id in deletedIds) {
-        adapter.delete(id, remote: false);
+        await adapter.delete(id, remote: false);
       }
     }
 

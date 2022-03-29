@@ -31,10 +31,9 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   Stream<List<T>> streamAll({
     Map<String, dynamic>? params,
     Map<String, String>? headers,
-    bool? syncLocal,
+    bool syncLocal = false,
     bool autoRenew = true,
     UnsupportedEventCb? onUnsupportedEvent,
-    OnDataError<List<T>>? onError,
   }) =>
       StreamAllController<T>(
         createStream: () async {
@@ -46,7 +45,7 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
           );
         },
         adapter: this,
-        syncLocal: syncLocal ?? false,
+        syncLocal: syncLocal,
         autoRenew: autoRenew,
         onUnsupportedEvent: onUnsupportedEvent,
       ).stream;

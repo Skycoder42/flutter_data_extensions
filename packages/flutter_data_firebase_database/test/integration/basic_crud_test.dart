@@ -4,39 +4,13 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:test/test.dart';
 
 import 'repositories/test_repository.dart';
-import 'setup/account_setup.dart';
-import 'setup/config_setup.dart';
-import 'setup/database_setup.dart';
-import 'setup/di_setup.dart';
-import 'setup/repo_setup.dart';
-import 'setup/setup.dart';
-
-class _SampleTestSetup extends Setup
-    with DiSetup, ConfigSetup, AccountSetup, DatabaseSetup, RepoSetup {
-  late Repository<TestModel> repository;
-
-  @override
-  Future<void> setUpAll() async {
-    await super.setUpAll();
-
-    repository = di.read(testModelsRepositoryProvider);
-  }
-
-  @override
-  Future<void> tearDownAll() async {
-    try {
-      repository.dispose();
-    } finally {
-      await super.tearDownAll();
-    }
-  }
-}
+import 'setup/test_repository_setup.dart';
 
 void main() {
+  final setup = TestRepositorySetup()..call();
+
   group('basic crud', () {
     const knownId = 'known-id';
-
-    final setup = _SampleTestSetup()..call();
 
     Matcher _isTestModel(String name, {Matcher? id}) => isA<TestModel>()
         .having((model) => model.name, 'name', name)
