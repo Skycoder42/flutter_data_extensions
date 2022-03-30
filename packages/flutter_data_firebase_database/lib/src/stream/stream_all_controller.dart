@@ -6,80 +6,33 @@ import 'package:meta/meta.dart';
 import '../firebase_database_adapter.dart';
 import '../serialization/firebase_value_transformer.dart';
 import 'database_event.dart';
-import 'errors/authentication_revoked.dart';
-import 'errors/remote_cancellation.dart';
-
-typedef UnsupportedEventCb = void Function(String event, String? path);
+import 'stream_controller_base.dart';
 
 @internal
-class StreamAllController<T extends DataModel<T>> {
-  static const _rootPath = '/';
-
+class StreamAllController<T extends DataModel<T>>
+    extends StreamControllerBase<T, List<T>> {
   static final _subPathRegexp = RegExp(r'^\/([^\/]+)$');
 
-  final Future<Stream<DatabaseEvent>> Function() createStream;
-  final FirebaseDatabaseAdapter<T> adapter;
   final bool syncLocal;
-  final bool autoRenew;
-  final UnsupportedEventCb? onUnsupportedEvent;
-
-  // ignore: cancel_subscriptions
-  StreamSubscription<void>? _databaseEventSub;
-  late final _streamController = StreamController<List<T>>(
-    onListen: _onListen,
-    // do not pause event source, as it might be a broadcast and
-    // we do not want to miss any events
-    onCancel: _onCancel,
-  );
 
   List<T> _streamState = const [];
 
   StreamAllController({
-    required this.createStream,
-    required this.adapter,
+    required Future<Stream<DatabaseEvent>> Function() createStream,
+    required FirebaseDatabaseAdapter<T> adapter,
     this.syncLocal = false,
-    this.autoRenew = true,
-    this.onUnsupportedEvent,
-  });
-
-  Stream<List<T>> get stream => _streamController.stream;
-
-  void _onListen() {
-    _databaseEventSub = Stream.fromFuture(createStream())
-        .asyncExpand((stream) => stream)
-        .asyncMap(_onEvent)
-        .listen(
-          // use asyncMap to listen to ensure events are processed sequentially
-          null,
-          onError: _streamController.addError,
-          onDone: _streamController.close,
-          // If desired, errors will cancel via the controller
-          cancelOnError: false,
+    bool autoRenew = true,
+    UnsupportedEventCb? onUnsupportedEvent,
+  }) : super(
+          createStream: createStream,
+          adapter: adapter,
+          autoRenew: autoRenew,
+          onUnsupportedEvent: onUnsupportedEvent,
         );
-  }
 
-  Future<void> _onCancel({bool closeController = true}) async {
-    try {
-      final sub = _databaseEventSub;
-      _databaseEventSub = null;
-      await sub?.cancel();
-    } finally {
-      if (closeController && !_streamController.isClosed) {
-        await _streamController.close();
-      }
-    }
-  }
-
-  FutureOr<void> _onEvent(DatabaseEvent event) => event.when(
-        put: _put,
-        patch: _patch,
-        keepAlive: _keepAlive,
-        cancel: _cancel,
-        authRevoked: _authRevoked,
-      );
-
-  Future<void> _put(DatabaseEventData data) =>
-      data.path == _rootPath ? _reset(data) : _update(data);
+  @override
+  Future<void> put(DatabaseEventData data) =>
+      data.path == StreamControllerBase.rootPath ? _reset(data) : _update(data);
 
   Future<void> _reset(DatabaseEventData data) async {
     if (syncLocal) {
@@ -115,8 +68,9 @@ class StreamAllController<T extends DataModel<T>> {
     }
   }
 
-  Future<void> _patch(DatabaseEventData data) async {
-    if (data.path != _rootPath) {
+  @override
+  Future<void> patch(DatabaseEventData data) async {
+    if (data.path != StreamControllerBase.rootPath) {
       onUnsupportedEvent?.call('patch', data.path);
       return;
     }
@@ -140,24 +94,9 @@ class StreamAllController<T extends DataModel<T>> {
     _patchState(deserialized.models, deletedIds);
   }
 
-  void _keepAlive() {}
-
-  void _cancel(String reason) {
-    _streamController.addError(RemoteCancellation(reason));
-  }
-
-  void _authRevoked() {
-    if (autoRenew) {
-      _onCancel(closeController: false).catchError(_streamController.addError);
-      _onListen();
-    } else {
-      _streamController.addError(AuthenticationRevoked(), StackTrace.current);
-    }
-  }
-
   void _replaceState(List<T> newState) {
     _streamState = List.unmodifiable(newState);
-    _streamController.add(_streamState);
+    sink.add(_streamState);
   }
 
   void _updateState(T data) {
@@ -173,7 +112,7 @@ class StreamAllController<T extends DataModel<T>> {
       if (!added) data,
     ]);
 
-    _streamController.add(_streamState);
+    sink.add(_streamState);
   }
 
   void _removeState(Object id) {
@@ -182,7 +121,7 @@ class StreamAllController<T extends DataModel<T>> {
         if (value.id != id) value,
     ]);
 
-    _streamController.add(_streamState);
+    sink.add(_streamState);
   }
 
   void _patchState(List<T> modified, List<String> deleted) {
@@ -199,6 +138,6 @@ class StreamAllController<T extends DataModel<T>> {
       ...modifiedPairs.values,
     ]);
 
-    _streamController.add(_streamState);
+    sink.add(_streamState);
   }
 }

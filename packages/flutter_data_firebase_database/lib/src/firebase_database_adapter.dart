@@ -8,6 +8,7 @@ import 'queries/request_config.dart';
 import 'serialization/firebase_value_transformer.dart';
 import 'stream/event_stream/database_event_stream.dart';
 import 'stream/stream_all_controller.dart';
+import 'stream/stream_controller_base.dart';
 
 class TransactionFailureException implements Exception {}
 
