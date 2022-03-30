@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   eventsource: ^0.4.0
-  flutter_data: ^1.3.2
+  flutter_data: ^1.3.3
   freezed_annotation: ^1.1.0
   http: ^0.13.4
   json_annotation: ^4.4.0
