@@ -9,6 +9,7 @@ import 'serialization/firebase_value_transformer.dart';
 import 'stream/event_stream/database_event_stream.dart';
 import 'stream/stream_all_controller.dart';
 import 'stream/stream_controller_base.dart';
+import 'stream/stream_one_controller.dart';
 
 class TransactionFailureException implements Exception {}
 
@@ -55,9 +56,23 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     String id, {
     Map<String, dynamic>? params,
     Map<String, String>? headers,
-    OnDataError<T?>? onError,
+    bool autoRenew = true,
+    UnsupportedEventCb? onUnsupportedEvent,
   }) =>
-      const Stream.empty();
+      StreamOneController<T>(
+        id: id,
+        createStream: () async {
+          final actualParams = await defaultParams & params;
+          return DatabaseEventStream(
+            uri: baseUrl.asUri / urlForFindOne(id, actualParams) & actualParams,
+            headers: await defaultHeaders & headers,
+            client: httpClient,
+          );
+        },
+        adapter: this,
+        autoRenew: autoRenew,
+        onUnsupportedEvent: onUnsupportedEvent,
+      ).stream;
 
   // Future<T?> transaction(
   //   Object id,

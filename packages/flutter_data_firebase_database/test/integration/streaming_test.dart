@@ -74,10 +74,8 @@ void main() {
         await _put(TestModel(id: '_1', name: 'model1'));
         await _put(TestModel(id: '_2', name: 'model2'));
 
-        final stream = sut.streamAll();
-
         expect(
-          stream,
+          sut.streamAll(),
           emitsInOrder(<dynamic>[
             emits([
               TestModel(id: '_1', name: 'model1'),
@@ -161,6 +159,70 @@ void main() {
               continue;
             default:
               expect(event, hasLength(0));
+              break;
+          }
+          break;
+        }
+      });
+    });
+
+    group('streamOne', () {
+      test('stream of new repository entry is initially null', () {
+        final stream = sut.streamOne('new-id');
+        expect(stream, emits(isNull));
+      });
+
+      test('streams server events with remote changes', () async {
+        // create initial data
+        const testId = 'test_id1';
+        await _put(TestModel(id: testId, name: 'model1'));
+
+        expect(
+          sut.streamOne(testId),
+          emitsInOrder(<dynamic>[
+            TestModel(id: testId, name: 'model1'),
+            TestModel(id: testId, name: 'model2'),
+            isNull,
+            TestModel(id: testId, name: 'model3'),
+            isNull,
+          ]),
+        );
+
+        await _put(TestModel(id: testId, name: 'model2'));
+        await _delete(testId);
+        await _put(TestModel(id: testId, name: 'model3'));
+        await _delete(testId);
+      });
+
+      test('stream events update the local repository', () async {
+        // create initial data
+        const testId = 'test_id2';
+        await _put(TestModel(id: testId, name: 'model1'));
+
+        var stage = 0;
+        await for (final event in sut.streamOne(testId)) {
+          final localState = await sut.findOne(testId, remote: false);
+          expect(localState, event);
+
+          switch (stage++) {
+            case 0:
+              expect(event, isNotNull);
+              await _put(TestModel(id: testId, name: 'model2'));
+              continue;
+            case 1:
+              expect(event, isNotNull);
+              await _delete(testId);
+              continue;
+            case 2:
+              expect(event, isNull);
+              await _put(TestModel(id: testId, name: 'model3'));
+              continue;
+            case 3:
+              expect(event, isNotNull);
+              await _delete(testId);
+              continue;
+            default:
+              expect(event, isNull);
               break;
           }
           break;

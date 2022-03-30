@@ -75,10 +75,10 @@ abstract class StreamControllerBase<TModel extends DataModel<TModel>, TStream> {
       );
 
   @protected
-  Future<void> put(DatabaseEventData data);
+  FutureOr<void> put(DatabaseEventData data);
 
   @protected
-  Future<void> patch(DatabaseEventData data);
+  FutureOr<void> patch(DatabaseEventData data);
 
   void _keepAlive() {}
 

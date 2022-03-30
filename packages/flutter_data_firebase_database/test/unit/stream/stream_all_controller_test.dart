@@ -25,9 +25,6 @@ class TestDataModel extends DataModel<TestDataModel> {
   });
 
   @override
-  String toString() => 'TestDataModel($id, $data)';
-
-  @override
   bool operator ==(Object other) {
     if (other is! TestDataModel) {
       return false;
@@ -38,6 +35,9 @@ class TestDataModel extends DataModel<TestDataModel> {
 
   @override
   int get hashCode => id.hashCode ^ data.hashCode;
+
+  @override
+  String toString() => 'TestDataModel($id, $data)';
 }
 
 class MockUnsupportedEventCb extends Mock implements UnsupportedEventCb {}
