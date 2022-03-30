@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 class RemoteCancellation implements Exception {
   final String reason;
 
