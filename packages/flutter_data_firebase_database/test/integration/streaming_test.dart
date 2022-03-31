@@ -187,6 +187,7 @@ void main() {
             isNull,
           ]),
         );
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         await _put(TestModel(id: testId, name: 'model2'));
         await _delete(testId);

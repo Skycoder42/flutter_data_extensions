@@ -3,4 +3,4 @@
 ## TODOs
 - documentation
 - transactions
-- streaming
+- ID handling -> is Object allowed or only String
