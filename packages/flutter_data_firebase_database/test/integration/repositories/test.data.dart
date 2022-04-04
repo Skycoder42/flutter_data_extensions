@@ -1,7 +1,7 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: directives_ordering, top_level_function_literal_block
 
 import 'package:flutter_data/flutter_data.dart';
+import 'package:hive/hive.dart';
 
 import 'test_repository.dart';
 import 'values_repository.dart';
@@ -15,6 +15,7 @@ ConfigureRepositoryLocalStorage configureRepositoryLocalStorage = ({
     hiveLocalStorageProvider.overrideWithProvider(
       Provider(
         (_) => HiveLocalStorage(
+          hive: Hive,
           baseDirFn: baseDirFn,
           encryptionKey: encryptionKey,
           clear: clear,
