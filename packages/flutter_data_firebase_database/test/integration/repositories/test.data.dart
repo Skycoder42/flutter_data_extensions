@@ -4,6 +4,7 @@
 import 'package:flutter_data/flutter_data.dart';
 
 import 'test_repository.dart';
+import 'values_repository.dart';
 
 // ignore: prefer_function_declarations_over_variables
 ConfigureRepositoryLocalStorage configureRepositoryLocalStorage = ({
@@ -28,16 +29,21 @@ RepositoryInitializerProvider repositoryInitializerProvider =
         );
 
 final repositoryProviders = <String, Provider<Repository<DataModel>>>{
-  'testModels': testModelsRepositoryProvider
+  'testModels': testModelsRepositoryProvider,
+  'valuesModels': valuesModelsRepositoryProvider,
 };
 
 final _repositoryInitializerProviderFamily =
     FutureProvider.family<RepositoryInitializer, RepositoryInitializerArgs>(
         (ref, args) async {
   final adapters = <String, RemoteAdapter>{
-    'testModels': ref.watch(testModelsRemoteAdapterProvider)
+    'testModels': ref.watch(testModelsRemoteAdapterProvider),
+    'valuesModels': ref.watch(valuesModelsRemoteAdapterProvider),
   };
-  final remotes = <String, bool>{'testModels': true};
+  final remotes = <String, bool>{
+    'testModels': true,
+    'valuesModels': true,
+  };
 
   await ref.watch(graphNotifierProvider).initialize();
 
