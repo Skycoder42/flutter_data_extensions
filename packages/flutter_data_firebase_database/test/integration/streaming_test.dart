@@ -1,8 +1,11 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_data/flutter_data.dart';
-import 'package:flutter_data_firebase_database/src/firebase_database_adapter.dart';
+// ignore: test_library_import
+import 'package:flutter_data_firebase_database/flutter_data_firebase_database.dart';
 import 'package:test/test.dart';
 
 import 'repositories/test_repository.dart';
@@ -23,10 +26,8 @@ void main() {
     Future<void> _put(TestModel model) async {
       final params = await sut.defaultParams;
       await sut.sendRequest<void>(
-        // ignore: invalid_use_of_protected_member
         sut.baseUrl.asUri / sut.urlForSave(model.id, params) & params,
         method: sut.methodForSave(model.id, params),
-        // ignore: invalid_use_of_protected_member
         headers: await sut.defaultHeaders,
         body: json.encode(sut.serialize(model)),
       );
@@ -38,11 +39,8 @@ void main() {
     Future<void> _delete(String id) async {
       final params = await sut.defaultParams;
       await sut.sendRequest<void>(
-        // ignore: invalid_use_of_protected_member
         sut.baseUrl.asUri / sut.urlForDelete(id, params) & params,
-        // ignore: invalid_use_of_protected_member
         method: sut.methodForDelete(id, params),
-        // ignore: invalid_use_of_protected_member
         headers: await sut.defaultHeaders,
       );
       if (_kIsWeb) {

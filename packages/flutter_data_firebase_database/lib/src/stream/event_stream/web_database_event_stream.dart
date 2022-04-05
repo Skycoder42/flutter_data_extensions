@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -10,13 +11,14 @@ import '../database_event.dart';
 class DatabaseEventStream extends Stream<DatabaseEvent> {
   final Uri uri;
   final Map<String, String>? headers;
-  final dynamic client;
 
   DatabaseEventStream({
     required this.uri,
     this.headers,
-    this.client,
-  });
+    http.Client? client,
+  }) {
+    client?.close();
+  }
 
   @override
   StreamSubscription<DatabaseEvent> listen(

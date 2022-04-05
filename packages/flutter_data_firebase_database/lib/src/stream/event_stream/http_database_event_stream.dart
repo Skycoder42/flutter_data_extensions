@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:eventsource/eventsource.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../database_event.dart';
 
@@ -26,6 +27,7 @@ class DatabaseEventStream extends Stream<DatabaseEvent> {
     bool? cancelOnError,
   }) =>
       Stream.fromFuture(createEventSource())
+          .doOnCancel(() => client?.close())
           .asyncExpand((eventSource) => eventSource)
           .map(_mapEventToDatabaseEvent)
           .listen(

@@ -19,7 +19,11 @@ class MockStreamedResponse extends Mock implements StreamedResponse {}
 class TestableDatabaseEventStream extends DatabaseEventStream {
   final Stream<Event> eventSource;
 
-  TestableDatabaseEventStream(this.eventSource) : super(uri: Uri());
+  TestableDatabaseEventStream(this.eventSource, [Client? client])
+      : super(
+          uri: Uri(),
+          client: client,
+        );
 
   @override
   Future<Stream<Event>> createEventSource() async => eventSource;
@@ -133,6 +137,32 @@ void main() {
           emitsDone,
         ]),
       );
+    });
+
+    test('closes http client when done', () async {
+      final mockClient = MockClient();
+      final sut = TestableDatabaseEventStream(const Stream.empty(), mockClient);
+
+      await expectLater(sut, emitsDone);
+
+      verify(() => mockClient.close());
+    });
+
+    test('closes http client when canceled', () async {
+      final mockClient = MockClient();
+      final sut = TestableDatabaseEventStream(
+        Stream.periodic(
+          const Duration(seconds: 1),
+          (index) => Event(data: index.toString()),
+        ),
+        mockClient,
+      );
+
+      final sub = sut.listen(null);
+      verifyNever(() => mockClient.close());
+
+      await sub.cancel();
+      verify(() => mockClient.close());
     });
 
     test('createEventSource creates event source with correct arguments',

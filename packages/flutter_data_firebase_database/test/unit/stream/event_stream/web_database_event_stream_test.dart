@@ -6,6 +6,7 @@ import 'dart:html';
 import 'package:dart_test_tools/test.dart';
 import 'package:flutter_data_firebase_database/src/stream/database_event.dart';
 import 'package:flutter_data_firebase_database/src/stream/event_stream/web_database_event_stream.dart';
+import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
@@ -15,10 +16,13 @@ class MockEventSource extends Mock implements EventSource {}
 
 class MockEvents extends Mock implements Events {}
 
+class MockClient extends Mock implements http.Client {}
+
 class TestableDatabaseEventStream extends DatabaseEventStream {
   final MockEventSource mockEventSource;
 
-  TestableDatabaseEventStream(this.mockEventSource) : super(uri: Uri());
+  TestableDatabaseEventStream(this.mockEventSource, [http.Client? client])
+      : super(uri: Uri(), client: client);
 
   @override
   EventSource createEventSource() => mockEventSource;
@@ -40,6 +44,12 @@ void main() {
       when(() => mockEventSource.onError).thenStream(const Stream.empty());
 
       sut = TestableDatabaseEventStream(mockEventSource);
+    });
+
+    test('closes client upon construction', () {
+      final mockClient = MockClient();
+      TestableDatabaseEventStream(mockEventSource, mockClient);
+      verify(() => mockClient.close());
     });
 
     testData<Tuple3<String, MessageEvent, DatabaseEvent>>(
