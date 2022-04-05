@@ -23,6 +23,7 @@ class TestRepositorySetup extends Setup
   @override
   Future<void> tearDownAll() async {
     try {
+      await repository.clear();
       repository.dispose();
     } finally {
       await super.tearDownAll();
