@@ -369,30 +369,34 @@ void main() {
         });
 
         test(
-            'default onError handler transforms 412 errors and rethrows others',
-            () async {
-          final testData = TestDataModel(id: id, data: 1);
+          'default onError handler transforms 412 errors and rethrows others',
+          () async {
+            final testData = TestDataModel(id: id, data: 1);
 
-          when(() => mockTransaction.call(any())).thenReturn(testData);
+            when(() => mockTransaction.call(any())).thenReturn(testData);
 
-          await sut(id, mockTransaction);
+            await sut(id, mockTransaction);
 
-          final onError = verify(
-            () => mockAdapter.save(
-              testData,
-              remote: true,
-              headers: any(named: 'headers'),
-              onError: captureAny(named: 'onError'),
-            ),
-          ).captured.cast<OnDataError<TestDataModel>>().single;
+            final onError = verify(
+              () => mockAdapter.save(
+                testData,
+                remote: true,
+                headers: any(named: 'headers'),
+                onError: captureAny(named: 'onError'),
+              ),
+            ).captured.cast<OnDataError<TestDataModel>>().single;
 
-          const anyError = DataException('error');
-          expect(() => onError(anyError), throwsA(anyError));
-          expect(
-            () => onError(const DataException('', statusCode: 412)),
-            throwsA(isA<TransactionRejected>()),
-          );
-        });
+            const anyError = DataException('error');
+            expect(() => onError(anyError), throwsA(anyError));
+            expect(
+              () => onError(const DataException('', statusCode: 412)),
+              throwsA(isA<TransactionRejected>()),
+            );
+          },
+          onPlatform: <String, dynamic>{
+            'js': const Skip('Cannot test internal methods in JS')
+          },
+        );
 
         test('calls adapter.save with custom parameters', () async {
           final mockOnSuccess = MockOnDataCallable();
@@ -459,26 +463,30 @@ void main() {
         });
 
         test(
-            'default onError handler transforms 412 errors and rethrows others',
-            () async {
-          await sut(id, mockTransaction);
+          'default onError handler transforms 412 errors and rethrows others',
+          () async {
+            await sut(id, mockTransaction);
 
-          final onError = verify(
-            () => mockAdapter.delete(
-              id,
-              remote: true,
-              headers: any(named: 'headers'),
-              onError: captureAny(named: 'onError'),
-            ),
-          ).captured.cast<OnDataError<TestDataModel>>().single;
+            final onError = verify(
+              () => mockAdapter.delete(
+                id,
+                remote: true,
+                headers: any(named: 'headers'),
+                onError: captureAny(named: 'onError'),
+              ),
+            ).captured.cast<OnDataError<TestDataModel>>().single;
 
-          const anyError = DataException('error');
-          expect(() => onError(anyError), throwsA(anyError));
-          expect(
-            () => onError(const DataException('', statusCode: 412)),
-            throwsA(isA<TransactionRejected>()),
-          );
-        });
+            const anyError = DataException('error');
+            expect(() => onError(anyError), throwsA(anyError));
+            expect(
+              () => onError(const DataException('', statusCode: 412)),
+              throwsA(isA<TransactionRejected>()),
+            );
+          },
+          onPlatform: <String, dynamic>{
+            'js': const Skip('Cannot test internal methods in JS')
+          },
+        );
 
         test('calls adapter.delete with custom parameters', () async {
           final mockOnSuccess = MockOnDataCallable();
