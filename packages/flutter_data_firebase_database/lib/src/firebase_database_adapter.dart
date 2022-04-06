@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_data/flutter_data.dart';
+import 'package:meta/meta.dart';
 
 import 'queries/filter.dart';
 import 'queries/request_config.dart';
@@ -10,18 +11,7 @@ import 'stream/event_stream/database_event_stream.dart';
 import 'stream/stream_all_controller.dart';
 import 'stream/stream_controller_base.dart';
 import 'stream/stream_one_controller.dart';
-
-class TransactionFailureException implements Exception {}
-
-class RawResponse {
-  final int statusCode;
-  final Object? data;
-  final Map<String, String> headers;
-
-  const RawResponse(this.statusCode, this.data, this.headers);
-}
-
-typedef TransactionFn<T extends DataModel<T>> = FutureOr<T?> Function(T? data);
+import 'transactions/transaction.dart';
 
 mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   String get idToken;
@@ -74,66 +64,28 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
         onUnsupportedEvent: onUnsupportedEvent,
       ).stream;
 
-  // Future<T?> transaction(
-  //   Object id,
-  //   TransactionFn<T> transaction, {
-  //   Map<String, dynamic>? params,
-  //   Map<String, String>? headers,
-  //   OnDataError<T?>? onError,
-  // }) async {
-  //   final actualParams = await defaultParams & params;
-  //   // final actualHeaders =
-  //   //     await defaultHeaders & headers & ETagConstants.requestETagHeaders;
-
-  //   final rawResponse = await _sendRawRequest(
-  //     baseUrl.asUri / urlForFindOne(id, actualParams) & actualParams,
-  //     method: methodForFindOne(id, actualParams),
-  //     headers: headers,
-  //     onError: onError,
-  //   );
-
-  //   if (rawResponse == null) {
-  //     throw UnimplementedError(); // TODO
-  //   }
-
-  //   if (rawResponse.statusCode != 200) {
-  //     throw UnimplementedError(); // TODO
-  //   }
-
-  //   final eTag = rawResponse.headers[ETagConstants.eTagHeaderName] ??
-  //       ETagConstants.nullETag;
-  //   final model = deserialize(rawResponse.data).model;
-
-  //   final updatedModel = await transaction(model);
-  //   if (updatedModel != null) {
-  //     await save(
-  //       updatedModel,
-  //       remote: true,
-  //       headers: {ETagConstants.ifMatchHeaderName: eTag},
-  //       onError: onError ?? onTransactionError,
-  //       // TODO params, headers, ...
-  //     );
-  //   } else {
-  //     await delete(
-  //       id,
-  //       remote: true,
-  //       headers: {ETagConstants.ifMatchHeaderName: eTag},
-  //       onError: onError ?? onTransactionError,
-  //       // TODO params, headers, ...
-  //     );
-  //   }
-
-  //   return updatedModel;
-  // }
-
-  // FutureOr<T?> onTransactionError(DataException error) {
-  //   if (error.statusCode == 412) {
-  //     throw TransactionFailureException();
-  //   }
-  //   return onError(error);
-  // }
+  Future<T?> transaction(
+    Object id,
+    TransactionFn<T> transaction, {
+    Map<String, dynamic>? params,
+    Map<String, String>? headers,
+    OnDataError<T>? onBeginError,
+    OnDataError<T>? onCommitError,
+  }) =>
+      Transaction(
+        adapter: this,
+        httpClientFactory: () => httpClient,
+      ).call(
+        id,
+        transaction,
+        params: params,
+        headers: headers,
+        onBeginError: onBeginError,
+        onCommitError: onCommitError,
+      );
 
   @override
+  @protected
   FutureOr<Map<String, dynamic>> get defaultParams async => <String, dynamic>{
         ...await super.defaultParams,
         ...?defaultRequestConfig?.asParams,
@@ -141,26 +93,32 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
       };
 
   @override
+  @protected
   String urlForFindAll(Map<String, dynamic> params) =>
       '${super.urlForFindAll(params)}.json';
 
   @override
+  @protected
   String urlForFindOne(dynamic id, Map<String, dynamic> params) =>
       '${super.urlForFindOne(id, params)}.json';
 
   @override
+  @protected
   String urlForSave(dynamic id, Map<String, dynamic> params) =>
       '${super.urlForSave(id, params)}.json';
 
   @override
+  @protected
   DataRequestMethod methodForSave(dynamic id, Map<String, dynamic> params) =>
       id != null ? DataRequestMethod.PUT : DataRequestMethod.POST;
 
   @override
+  @protected
   String urlForDelete(dynamic id, Map<String, dynamic> params) =>
       '${super.urlForDelete(id, params)}.json';
 
   @override
+  @protected
   FutureOr<R?> sendRequest<R>(
     Uri uri, {
     DataRequestMethod method = DataRequestMethod.GET,
@@ -215,6 +173,18 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     );
   }
 
+  @internal
+  Future<Uri> generateGetUri(Object id, Map<String, dynamic>? params) async {
+    final actualParams = await defaultParams & params;
+    return baseUrl.asUri / urlForFindOne(id, actualParams) & actualParams;
+  }
+
+  @internal
+  Future<Map<String, String>> generateHeaders(
+    Map<String, String>? headers,
+  ) async =>
+      await defaultHeaders & headers;
+
   Uri _uriWithDefaultQuery(Uri uri) {
     if (!uri.queryParameters.containsKey(Filter.orderByKey)) {
       final filter = defaultQueryFilter;
@@ -260,60 +230,4 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   static late final _findOneUriIdRegExp = RegExp(r'\.json$');
   static String _idFromUrl(Uri uri) =>
       uri.pathSegments.last.replaceAll(_findOneUriIdRegExp, '');
-
-  // Future<RawResponse?> _sendRawRequest(
-  //   Uri uri, {
-  //   DataRequestMethod method = DataRequestMethod.GET,
-  //   Map<String, String>? headers,
-  //   String? body,
-  //   OnDataError<void>? onError,
-  // }) async {
-  //   http.Response? response;
-  //   Object? data;
-  //   Object? error;
-  //   StackTrace? stackTrace;
-
-  //   try {
-  //     final request = http.Request(method.name, uri);
-  //     request.headers.addAll(headers ?? const {});
-  //     if (body != null) {
-  //       request.body = body;
-  //     }
-  //     final stream = await httpClient.send(request);
-  //     response = await http.Response.fromStream(stream);
-  //   } catch (err, stack) {
-  //     error = err;
-  //     stackTrace = stack;
-  //   } finally {
-  //     httpClient.close();
-  //   }
-
-  //   final code = response?.statusCode;
-  //   final responseHeaders = response?.headers ?? const {};
-  //   try {
-  //     if (response?.body.isNotEmpty ?? false) {
-  //       data = json.decode(response!.body);
-  //     }
-  //   } on FormatException catch (e) {
-  //     error = e;
-  //   }
-
-  //   if (error == null && code != null && code >= 200 && code < 300) {
-  //     return RawResponse(code, data, responseHeaders);
-  //   } else if (error != null) {
-  //     final e = DataException(
-  //       error,
-  //       stackTrace: stackTrace,
-  //       statusCode: code,
-  //     );
-  //     await (onError ?? this.onError).call(e);
-  //     return null;
-  //   } else {
-  //     return RawResponse(
-  //       code ?? 400,
-  //       data,
-  //       responseHeaders,
-  //     );
-  //   }
-  // }
 }

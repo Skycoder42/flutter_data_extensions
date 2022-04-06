@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 import 'package:meta/meta.dart';
 
 @internal
@@ -10,12 +12,7 @@ abstract class ETagConstants {
 
   static const ifMatchHeaderName = 'if-match';
 
-  /// 412 Precondition Failed
-  ///
-  /// The request's specified ETag value in the if-match header did not match
-  /// the server's value.
   static const statusCodeETagMismatch = 412;
 
-  /// ETag that indicates a null value at the server.
   static const nullETag = 'null_etag';
 }
