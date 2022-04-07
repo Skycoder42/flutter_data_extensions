@@ -138,21 +138,21 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
       case DataRequestType.findAll:
         assert(onSuccess != null);
         actualUri = _uriWithDefaultQuery(uri);
-        actualOnSuccess = _findAllOnSuccess(onSuccess!);
+        actualOnSuccess = _transformAllOnSuccess(onSuccess!);
         break;
       case DataRequestType.findOne:
         assert(onSuccess != null);
         actualUri = _uriWithDefaultQuery(uri);
-        actualOnSuccess = _findOneOnSuccess(onSuccess!, uri);
+        actualOnSuccess = _transformOneOnSuccess(onSuccess!, uri);
         break;
       case DataRequestType.save:
         assert(onSuccess != null);
         assert(body != null);
         if (method == DataRequestMethod.POST) {
-          actualOnSuccess = _savePostOnSuccess(onSuccess!, body!);
+          actualOnSuccess = _transformPostOnSuccess(onSuccess!, body!);
         } else {
-          actualBody = _savePutOrPatchBody(body!);
-          actualOnSuccess = _savePutOrPatchOnSuccess(onSuccess!, uri);
+          actualBody = _bodyWithoutId(body!);
+          actualOnSuccess = _transformOneOnSuccess(onSuccess!, uri);
         }
         break;
       case DataRequestType.delete:
@@ -196,28 +196,23 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     return uri;
   }
 
-  OnData<R> _findAllOnSuccess<R>(OnData<R> onSuccess) =>
+  OnData<R> _transformAllOnSuccess<R>(OnData<R> onSuccess) =>
       (rawData) => onSuccess(FirebaseValueTransformer.transformAll(rawData));
 
-  OnData<R> _findOneOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
+  OnData<R> _transformOneOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
       (rawData) => onSuccess(
             FirebaseValueTransformer.transformOne(rawData, _idFromUrl(uri)),
           );
 
-  OnData<R> _savePostOnSuccess<R>(OnData<R> onSuccess, String requestBody) =>
+  OnData<R> _transformPostOnSuccess<R>(
+    OnData<R> onSuccess,
+    String requestBody,
+  ) =>
       (rawData) => onSuccess(
             FirebaseValueTransformer.transformCreated(rawData, requestBody),
           );
 
-  OnData<R> _savePutOrPatchOnSuccess<R>(OnData<R> onSuccess, Uri uri) =>
-      (rawData) => onSuccess(
-            FirebaseValueTransformer.transformOne(
-              rawData,
-              _idFromUrl(uri),
-            ),
-          );
-
-  String _savePutOrPatchBody(String body) {
+  String _bodyWithoutId(String body) {
     final dynamic jsonData = json.decode(body);
     if (jsonData is Map<String, dynamic>) {
       jsonData.remove('id');
