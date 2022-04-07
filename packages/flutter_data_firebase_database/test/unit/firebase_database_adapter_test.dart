@@ -538,6 +538,40 @@ void main() {
     });
 
     group('internals', () {
+      test('generateGetAllUri generates full uri for get requests', () async {
+        final testUri1 = Uri.http('localhost', '/test');
+        const uriSubPath = 'data';
+        const testDefaultParams = {'a': 1, 'b': true};
+
+        when(() => mockRemoteAdapter.baseUrl).thenReturn(testUri1.toString());
+        when(() => mockRemoteAdapter.urlForFindAll(any()))
+            .thenReturn(uriSubPath);
+        when(() => mockRemoteAdapter.defaultParams)
+            .thenReturn(testDefaultParams);
+
+        const testParams = {'c': 4.2};
+        final uri = await sut.generateGetAllUri(testParams);
+
+        expect(
+          uri,
+          Uri.parse(
+            'http://localhost/test/data.json?a=1&b=true&auth=id-token&c=4.2',
+          ),
+        );
+
+        verifyInOrder([
+          () => mockRemoteAdapter.defaultParams,
+          () => mockRemoteAdapter.baseUrl,
+          () => mockRemoteAdapter.urlForFindAll(
+                <String, dynamic>{
+                  ...testDefaultParams,
+                  'auth': testIdToken,
+                  ...testParams,
+                },
+              ),
+        ]);
+      });
+
       test('generateGetUri generates full uri for get requests', () async {
         final testUri1 = Uri.http('localhost', '/test');
         const uriSubPath = 'data';

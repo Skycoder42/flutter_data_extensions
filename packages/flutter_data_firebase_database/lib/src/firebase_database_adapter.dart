@@ -20,6 +20,7 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
 
   Filter? get defaultQueryFilter => null;
 
+  // coverage:ignore-start
   Stream<List<T>> streamAll({
     Map<String, dynamic>? params,
     Map<String, String>? headers,
@@ -28,20 +29,19 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
     UnsupportedEventCb? onUnsupportedEvent,
   }) =>
       StreamAllController<T>(
-        createStream: () async {
-          final actualParams = await defaultParams & params;
-          return DatabaseEventStream(
-            uri: baseUrl.asUri / urlForFindAll(actualParams) & actualParams,
-            headers: await defaultHeaders & headers,
-            client: httpClient,
-          );
-        },
+        createStream: () async => DatabaseEventStream(
+          uri: await generateGetAllUri(params),
+          headers: await generateHeaders(headers),
+          client: httpClient,
+        ),
         adapter: this,
         syncLocal: syncLocal,
         autoRenew: autoRenew,
         onUnsupportedEvent: onUnsupportedEvent,
       ).stream;
+  // coverage:ignore-end
 
+  // coverage:ignore-start
   Stream<T?> streamOne(
     String id, {
     Map<String, dynamic>? params,
@@ -51,19 +51,18 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   }) =>
       StreamOneController<T>(
         id: id,
-        createStream: () async {
-          final actualParams = await defaultParams & params;
-          return DatabaseEventStream(
-            uri: baseUrl.asUri / urlForFindOne(id, actualParams) & actualParams,
-            headers: await defaultHeaders & headers,
-            client: httpClient,
-          );
-        },
+        createStream: () async => DatabaseEventStream(
+          uri: await generateGetUri(id, params),
+          headers: await generateHeaders(headers),
+          client: httpClient,
+        ),
         adapter: this,
         autoRenew: autoRenew,
         onUnsupportedEvent: onUnsupportedEvent,
       ).stream;
+  // coverage:ignore-end
 
+  // coverage:ignore-start
   Future<T?> transaction(
     Object id,
     TransactionFn<T> transaction, {
@@ -83,6 +82,7 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
         onBeginError: onBeginError,
         onCommitError: onCommitError,
       );
+  // coverage:ignore-end
 
   @override
   @protected
@@ -171,6 +171,12 @@ mixin FirebaseDatabaseAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
       onSuccess: actualOnSuccess ?? onSuccess,
       onError: onError,
     );
+  }
+
+  @internal
+  Future<Uri> generateGetAllUri(Map<String, dynamic>? params) async {
+    final actualParams = await defaultParams & params;
+    return baseUrl.asUri / urlForFindAll(actualParams) & actualParams;
   }
 
   @internal
