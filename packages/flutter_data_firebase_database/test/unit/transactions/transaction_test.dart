@@ -355,7 +355,7 @@ void main() {
 
           await expectLater(
             () => sut.call(id, mockTransaction),
-            throwsA(isA<TransactionRejected>()),
+            throwsA(isA<TransactionInvalid>()),
           );
 
           verifyNever(

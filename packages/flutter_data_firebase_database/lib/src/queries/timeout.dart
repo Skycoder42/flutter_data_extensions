@@ -30,13 +30,6 @@ class Timeout with _$Timeout {
   @Assert('value <= 15', 'value must be at most 15 min')
   const factory Timeout.min(int value) = _TimeoutMin;
 
-  /// The integer value of the timeout.
-  ///
-  /// Depending on the timeout, this can either be milliseconds, seconds or
-  /// minutes.
-  @override
-  int get value;
-
   /// Creates a timeout from a [Duration] object.
   ///
   /// The limit of max. 15 minutes still applies for [duration]. The resulting
@@ -52,6 +45,13 @@ class Timeout with _$Timeout {
       return Timeout.min(duration.inMinutes);
     }
   }
+
+  /// The integer value of the timeout.
+  ///
+  /// Depending on the timeout, this can either be milliseconds, seconds or
+  /// minutes.
+  @override
+  int get value;
 
   /// Converts the timeout to a [Duration] with the same time value.
   Duration get duration => when(

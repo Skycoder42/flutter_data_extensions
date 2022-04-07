@@ -8,19 +8,8 @@ class MockBinaryReader extends Mock implements BinaryReader {}
 class MockBinaryWriter extends Mock implements BinaryWriter {}
 
 void main() {
-  _testIncrementable(
-    testValue: 42,
-    createNew: ServerIncrementable<int>.new,
-    createValue: ServerIncrementable<int>.value,
-    createFromJson: ServerIncrementable<int>.fromJson,
-  );
-
-  _testIncrementable(
-    testValue: 4.2,
-    createNew: ServerIncrementable<double>.new,
-    createValue: ServerIncrementable<double>.value,
-    createFromJson: ServerIncrementable<double>.fromJson,
-  );
+  _testIncrementable(testValue: 42);
+  _testIncrementable(testValue: 4.2);
 
   group('ServerIncrementableHiveAdapter', () {
     const customTypeId = 21;
@@ -55,7 +44,7 @@ void main() {
 
         final data = sut.read(mockBinaryReader);
 
-        expect(data, const ServerIncrementable(5.3));
+        expect(data, const ServerIncrementable.increment(5.3));
         verifyInOrder<dynamic>([
           () => mockBinaryReader.readByte(),
           () => mockBinaryReader.read(),
@@ -97,7 +86,10 @@ void main() {
 
       test('writes server incrementable', () {
         const icValue = 11.1;
-        sut.write(mockBinaryWriter, const ServerIncrementable(icValue));
+        sut.write(
+          mockBinaryWriter,
+          const ServerIncrementable.increment(icValue),
+        );
 
         verifyInOrder([
           () => mockBinaryWriter.writeByte(1),
@@ -120,57 +112,62 @@ void main() {
   });
 }
 
-void _testIncrementable<T extends ServerIncrementable<TValue>,
-        TValue extends num>({
+void _testIncrementable<TValue extends num>({
   required TValue testValue,
-  required T Function(TValue) createNew,
-  required T Function(TValue) createValue,
-  required T Function(dynamic) createFromJson,
 }) =>
-    group('$T', () {
-      group('new', () {
+    group('${ServerIncrementable<TValue>}', () {
+      group('increment', () {
         test('toJson creates incrementable server value', () {
-          final si = createNew(testValue);
+          final si = ServerIncrementable<TValue>.increment(testValue);
 
           expect(si.toJson(), {
             '.sv': {'increment': testValue},
           });
         });
 
-        test('fromJson throws for server incrementable json data', () {
-          expect(
-            () => createFromJson({
-              '.sv': {'increment': testValue}
-            }),
-            throwsArgumentError,
-          );
-        });
-
         test('value throws unsupported error', () {
-          final si = createNew(testValue);
+          final si = ServerIncrementable<TValue>.increment(testValue);
           expect(() => si.value, throwsUnsupportedError);
         });
       });
 
       group('value', () {
         test('toJson creates simple value', () {
-          final si = createValue(testValue);
+          final si = ServerIncrementable<TValue>.value(testValue);
 
           expect(si.toJson(), testValue);
         });
 
-        test('fromJson can convert a simple value', () {
-          final si = createFromJson(testValue);
-          si.maybeWhen(
-            null,
-            value: (value) => expect(value, testValue),
-            orElse: () => fail('Unexpected server incrementable: $si'),
+        test('value returns internal value', () {
+          final si = ServerIncrementable<TValue>.value(testValue);
+          expect(si.value, testValue);
+        });
+      });
+
+      group('fromJson', () {
+        test(
+            'fromJson returns server incrementable '
+            'for server incrementable placeholder', () {
+          expect(
+            ServerIncrementable<TValue>.fromJson({
+              '.sv': {'increment': testValue}
+            }),
+            ServerIncrementable<TValue>.increment(testValue),
           );
         });
 
-        test('value returns internal value', () {
-          final si = createValue(testValue);
-          expect(si.value, testValue);
+        test('fromJson can convert a simple value', () {
+          expect(
+            ServerIncrementable<TValue>.fromJson(testValue),
+            ServerIncrementable<TValue>.value(testValue),
+          );
+        });
+
+        test('fromJson throws for invalid json data', () {
+          expect(
+            () => ServerIncrementable<TValue>.fromJson('invalid'),
+            throwsArgumentError,
+          );
         });
       });
     });

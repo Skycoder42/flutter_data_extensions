@@ -46,7 +46,7 @@ void main() {
       const id = 'timestamp-1';
       final model = ValuesModel(
         id: id,
-        serverTimestamp: const ServerTimestamp(),
+        serverTimestamp: const ServerTimestamp.server(),
       );
 
       final before = DateTime.now().subtract(const Duration(seconds: 10));
@@ -86,7 +86,7 @@ void main() {
       const id = 'increment-1';
       final model = ValuesModel(
         id: id,
-        serverIncrementable: const ServerIncrementable(10),
+        serverIncrementable: const ServerIncrementable.increment(10),
       );
 
       final saveResponse = await setup.repository.save(model);
@@ -105,7 +105,7 @@ void main() {
       const id = 'increment-1';
       final model = ValuesModel(
         id: id,
-        serverIncrementable: const ServerIncrementable(5),
+        serverIncrementable: const ServerIncrementable.increment(5),
       );
 
       final saveResponse = await setup.repository.save(model);

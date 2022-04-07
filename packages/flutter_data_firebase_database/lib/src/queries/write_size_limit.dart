@@ -1,4 +1,4 @@
-/// Realtime Database estimates the size of each write request and aborts
+/// The Realtime Database estimates the size of each write request and aborts
 /// requests that will take longer than the target time.
 enum WriteSizeLimit {
   /// target=1s

@@ -117,7 +117,7 @@ class FilterBuilder<T> {
     return this;
   }
 
-  /// Generates the [Filter] that can be passed to API methods.
+  /// Generates the [Filter] that can be passed as params to the repository.
   Filter build() => Filter._(
         Map.unmodifiable(<String, String>{
           Filter.orderByKey: json.encode(_orderBy),

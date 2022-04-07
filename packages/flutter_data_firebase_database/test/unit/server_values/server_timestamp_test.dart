@@ -9,31 +9,48 @@ class MockBinaryWriter extends Mock implements BinaryWriter {}
 
 void main() {
   group('ServerTimestamp', () {
-    group('new', () {
+    group('server', () {
       test('toJson creates server value', () {
-        const st = ServerTimestamp();
+        const st = ServerTimestamp.server();
         expect(st.toJson(), const {'.sv': 'timestamp'});
       });
 
-      test('fromJson throws exception for server value', () {
-        expect(
-          () => ServerTimestamp.fromJson(const {'.sv': 'timestamp'}),
-          throwsArgumentError,
-        );
-      });
-
       test('dateTime throw unsupported error', () {
-        const st = ServerTimestamp();
+        const st = ServerTimestamp.server();
         expect(() => st.dateTime, throwsUnsupportedError);
       });
     });
 
     group('value', () {
+      test('throws assertion error if a non UTC timestamp is used as value',
+          () {
+        expect(
+          () => ServerTimestamp.value(DateTime.now()),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+
       test('toJson creates millis since epoch json value', () {
-        final now = DateTime.now();
+        final now = DateTime.now().toUtc();
         final st = ServerTimestamp.value(now);
 
         expect(st.toJson(), now.millisecondsSinceEpoch);
+      });
+
+      test('dateTime returns internal date time value', () {
+        final dt = DateTime.now().toUtc();
+        final st = ServerTimestamp.value(dt);
+        expect(st.dateTime, dt);
+      });
+    });
+
+    group('fromJson', () {
+      test('fromJson returns server value for server value placeholder json',
+          () {
+        expect(
+          ServerTimestamp.fromJson(const {'.sv': 'timestamp'}),
+          const ServerTimestamp.server(),
+        );
       });
 
       test('fromJson converts millis to utc timestamp', () {
@@ -41,18 +58,17 @@ void main() {
           DateTime.now().millisecondsSinceEpoch,
           isUtc: true,
         );
-        final st = ServerTimestamp.fromJson(now.millisecondsSinceEpoch);
-        st.maybeWhen(
-          null,
-          value: (value) => expect(value, now),
-          orElse: () => fail('Unexpected server incrementable: $st'),
+        expect(
+          ServerTimestamp.fromJson(now.millisecondsSinceEpoch),
+          ServerTimestamp.value(now),
         );
       });
 
-      test('dateTime returns internal date time value', () {
-        final dt = DateTime.now();
-        final st = ServerTimestamp.value(dt);
-        expect(st.dateTime, dt);
+      test('fromJson throws exception for invalid json', () {
+        expect(
+          () => ServerTimestamp.fromJson('invalid'),
+          throwsArgumentError,
+        );
       });
     });
   });
@@ -89,13 +105,13 @@ void main() {
 
         final data = sut.read(mockBinaryReader);
 
-        expect(data, const ServerTimestamp());
+        expect(data, const ServerTimestamp.server());
         verify(() => mockBinaryReader.readByte());
         verifyNoMoreInteractions(mockBinaryReader);
       });
 
       test('creates server timestamp value from data', () {
-        final dtValue = DateTime.now();
+        final dtValue = DateTime.now().toUtc();
         when(() => mockBinaryReader.readByte()).thenReturn(2);
         when<dynamic>(() => mockBinaryReader.read()).thenReturn(dtValue);
 
@@ -127,14 +143,14 @@ void main() {
       });
 
       test('writes server timestamp', () {
-        sut.write(mockBinaryWriter, const ServerTimestamp());
+        sut.write(mockBinaryWriter, const ServerTimestamp.server());
 
         verify(() => mockBinaryWriter.writeByte(1));
         verifyNoMoreInteractions(mockBinaryWriter);
       });
 
       test('writes server timestamp value', () {
-        final dtValue = DateTime.now();
+        final dtValue = DateTime.now().toUtc();
         sut.write(mockBinaryWriter, ServerTimestamp.value(dtValue));
 
         verifyInOrder([

@@ -10,6 +10,11 @@ import '../serialization/firebase_value_transformer.dart';
 import 'etag_constants.dart';
 import 'transaction_rejected.dart';
 
+/// The transaction function definition.
+///
+/// All transaction get either the [data] or null and must return data or null.
+/// If data is returned, it's [DataModel.id] must be the same as the
+/// transaction id. If this method throws, the transaction is aborted.
 typedef TransactionFn<T extends DataModel<T>> = FutureOr<T?> Function(T? data);
 
 @internal
@@ -97,7 +102,7 @@ class Transaction<T extends DataModel<T>> {
 
   OnDataError<R> _createOnCommitError<R>(Object id) => (DataException error) {
         if (error.statusCode == 412) {
-          throw TransactionRejected.remote(id);
+          throw TransactionRejected(id);
         }
 
         throw error;
@@ -173,7 +178,7 @@ class Transaction<T extends DataModel<T>> {
     }
 
     if (updatedModel.id != id) {
-      throw TransactionRejected.invalidId(id);
+      throw TransactionInvalid.invalidId(id);
     }
 
     if (originalModel != null) {

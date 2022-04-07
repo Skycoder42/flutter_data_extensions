@@ -1,6 +1,7 @@
 // ignore: test_library_import
+import 'package:flutter_data/flutter_data.dart';
+// ignore: test_library_import
 import 'package:flutter_data_firebase_database/flutter_data_firebase_database.dart';
-import 'package:hive/hive.dart';
 
 import '../repositories/test.data.dart';
 import 'database_setup.dart';
@@ -10,7 +11,7 @@ mixin RepoSetup on DatabaseSetup {
   Future<void> setUpAll() async {
     await super.setUpAll();
 
-    Hive
+    di.read(hiveLocalStorageProvider).hive
       ..registerAdapter(const ServerTimestampHiveAdapter())
       ..registerAdapter(const ServerIncrementableHiveAdapter<double>());
 
