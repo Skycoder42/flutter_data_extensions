@@ -1,11 +1,13 @@
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_data_firebase_database/flutter_data_firebase_database.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 import 'example_remote_adapter.dart';
 
 part 'example_model.g.dart';
 
+@internal
 @JsonSerializable()
 @DataRepository([FirebaseDatabaseAdapter, ExampleRemoteAdapter])
 class ExampleModel with DataModel<ExampleModel> {
