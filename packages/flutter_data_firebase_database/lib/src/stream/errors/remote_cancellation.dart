@@ -14,7 +14,7 @@ class RemoteCancellation implements Exception {
   /// The reason why the stream has been canceled.
   final String reason;
 
-  // Default constructor.
+  /// Default constructor.
   RemoteCancellation(this.reason);
 
   @override

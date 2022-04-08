@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 
 import 'package:flutter_data/flutter_data.dart';
@@ -115,7 +117,7 @@ class StreamAllController<T extends DataModel<T>>
     sink.add(_streamState);
   }
 
-  void _removeState(Object id) {
+  void _removeState(String id) {
     _streamState = List.unmodifiable(<T>[
       for (final value in _streamState)
         if (value.id != id) value,

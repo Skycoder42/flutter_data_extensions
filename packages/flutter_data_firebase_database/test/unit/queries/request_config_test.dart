@@ -9,7 +9,7 @@ import 'package:tuple/tuple.dart';
 void main() {
   group('RequestConfig', () {
     testData<Tuple2<RequestConfig, Map<String, String>>>(
-      'generates correct params from config',
+      'generates correct map representation from config',
       const [
         Tuple2(RequestConfig(), {}),
         Tuple2(RequestConfig(shallow: false), {'shallow': 'false'}),
@@ -35,7 +35,8 @@ void main() {
         ),
       ],
       (fixture) {
-        expect(fixture.item1.asParams, fixture.item2);
+        expect(fixture.item1 == fixture.item2, isFalse);
+        expect(fixture.item1, fixture.item2);
       },
     );
   });

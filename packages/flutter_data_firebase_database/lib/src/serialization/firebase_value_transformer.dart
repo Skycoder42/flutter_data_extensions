@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
@@ -20,7 +22,7 @@ abstract class FirebaseValueTransformer {
     }
   }
 
-  static Object? transformOne(Object? rawData, Object? id) {
+  static Object? transformOne(Object? rawData, String? id) {
     if (rawData is Map<String, dynamic>) {
       return <String, dynamic>{
         ...rawData,

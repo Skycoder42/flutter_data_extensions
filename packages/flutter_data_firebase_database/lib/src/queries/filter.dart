@@ -17,6 +17,7 @@ import 'package:meta/meta.dart';
 /// any order - if you only (or in addition) need to sort returned data, do so
 /// on the client side.
 class Filter extends UnmodifiableMapBase<String, String> {
+  /// @nodoc
   @internal
   static const orderByKey = 'orderBy';
 

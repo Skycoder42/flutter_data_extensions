@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'format_mode.dart';
@@ -10,7 +12,12 @@ part 'request_config.freezed.dart';
 /// configure standard realtime database parameters used by all firebase
 /// requests.
 @freezed
-class RequestConfig with _$RequestConfig {
+class RequestConfig
+    with
+        MapMixin<String, String>,
+        // ignore: prefer_mixin
+        UnmodifiableMapMixin<String, String>,
+        _$RequestConfig {
   const RequestConfig._();
 
   /// Default constructor.
@@ -34,14 +41,27 @@ class RequestConfig with _$RequestConfig {
     WriteSizeLimit? writeSizeLimit,
   }) = _RequestConfig;
 
-  /// Convert the request config into a map.
-  ///
-  /// As these parameters are typically used as request parameters, using this
-  /// getter you can easily convert it. The returned map is unmodifiable.
-  Map<String, String> get asParams => Map.unmodifiable(<String, String>{
-        if (shallow != null) 'shallow': shallow!.toString(),
-        if (format != null) 'format': format!.name,
-        if (timeout != null) 'timeout': timeout!.toString(),
-        if (writeSizeLimit != null) 'writeSizeLimit': writeSizeLimit!.name,
-      });
+  @override
+  String? operator [](Object? key) {
+    switch (key) {
+      case 'shallow':
+        return shallow?.toString();
+      case 'format':
+        return format?.name;
+      case 'timeout':
+        return timeout?.toString();
+      case 'writeSizeLimit':
+        return writeSizeLimit?.name;
+      default:
+        return null;
+    }
+  }
+
+  @override
+  Iterable<String> get keys => [
+        if (shallow != null) 'shallow',
+        if (format != null) 'format',
+        if (timeout != null) 'timeout',
+        if (writeSizeLimit != null) 'writeSizeLimit',
+      ];
 }

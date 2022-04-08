@@ -45,7 +45,7 @@ class ProxyRemoteAdapter implements RemoteAdapter<TestDataModel> {
 
 class SutRemoteAdapter extends ProxyRemoteAdapter with FirebaseDatabaseAdapter {
   @override
-  String idToken = testIdToken;
+  String? idToken = testIdToken;
 
   @override
   RequestConfig? defaultRequestConfig;
@@ -85,10 +85,19 @@ void main() {
       const testParams = {'a': '1', 'b': 'true'};
 
       group('defaultParams', () {
-        test('always adds auth token to params ', () async {
+        test('always adds auth token to params', () async {
           when(() => mockRemoteAdapter.defaultParams).thenReturn(testParams);
 
           expect(await sut.defaultParams, {...testParams, 'auth': testIdToken});
+
+          verify(() => mockRemoteAdapter.defaultParams);
+        });
+
+        test('does not add the token if explicitly set to null', () async {
+          when(() => mockRemoteAdapter.defaultParams).thenReturn(testParams);
+
+          sut.idToken = null;
+          expect(await sut.defaultParams, testParams);
 
           verify(() => mockRemoteAdapter.defaultParams);
         });
@@ -105,7 +114,7 @@ void main() {
 
           expect(await sut.defaultParams, {
             ...testParams,
-            ...requestConfig.asParams,
+            ...requestConfig,
             'auth': testIdToken,
           });
 
@@ -542,12 +551,14 @@ void main() {
         final testUri1 = Uri.http('localhost', '/test');
         const uriSubPath = 'data';
         const testDefaultParams = {'a': 1, 'b': true};
+        final testDefaultFilter = Filter.key().build();
 
         when(() => mockRemoteAdapter.baseUrl).thenReturn(testUri1.toString());
         when(() => mockRemoteAdapter.urlForFindAll(any()))
             .thenReturn(uriSubPath);
         when(() => mockRemoteAdapter.defaultParams)
             .thenReturn(testDefaultParams);
+        sut.defaultQueryFilter = testDefaultFilter;
 
         const testParams = {'c': 4.2};
         final uri = await sut.generateGetAllUri(testParams);
@@ -555,7 +566,7 @@ void main() {
         expect(
           uri,
           Uri.parse(
-            'http://localhost/test/data.json?a=1&b=true&auth=id-token&c=4.2',
+            'http://localhost/test/data.json?a=1&b=true&auth=id-token&c=4.2&orderBy=%22%24key%22',
           ),
         );
 
@@ -576,12 +587,14 @@ void main() {
         final testUri1 = Uri.http('localhost', '/test');
         const uriSubPath = 'data';
         const testDefaultParams = {'a': 1, 'b': true};
+        final testDefaultFilter = Filter.key().build();
 
         when(() => mockRemoteAdapter.baseUrl).thenReturn(testUri1.toString());
         when(() => mockRemoteAdapter.urlForFindOne(any<dynamic>(), any()))
             .thenReturn(uriSubPath);
         when(() => mockRemoteAdapter.defaultParams)
             .thenReturn(testDefaultParams);
+        sut.defaultQueryFilter = testDefaultFilter;
 
         const testId = 'test-id';
         const testParams = {'c': 4.2};
@@ -590,7 +603,7 @@ void main() {
         expect(
           uri,
           Uri.parse(
-            'http://localhost/test/data.json?a=1&b=true&auth=id-token&c=4.2',
+            'http://localhost/test/data.json?a=1&b=true&auth=id-token&c=4.2&orderBy=%22%24key%22',
           ),
         );
 

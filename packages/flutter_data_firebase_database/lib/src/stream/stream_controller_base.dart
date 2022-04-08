@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 
 import 'package:flutter_data/flutter_data.dart';
@@ -7,12 +9,6 @@ import '../firebase_database_adapter.dart';
 import 'database_event.dart';
 import 'errors/authentication_revoked.dart';
 import 'errors/remote_cancellation.dart';
-
-/// A callback for handling unsupported realtime database events.
-///
-/// Can be used to log these events or to throw an exception to terminate the
-/// connection.
-typedef UnsupportedEventCb = void Function(String event, String? path);
 
 @internal
 abstract class StreamControllerBase<TModel extends DataModel<TModel>, TStream> {

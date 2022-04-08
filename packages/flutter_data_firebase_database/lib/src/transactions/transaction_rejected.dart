@@ -4,7 +4,7 @@
 /// transaction.
 abstract class TransactionException implements Exception {
   /// The id of the dataset for which the transaction failed.
-  final Object id;
+  final String id;
 
   /// The error message of this exception.
   final String message;
@@ -20,7 +20,7 @@ abstract class TransactionException implements Exception {
 /// thus rejected.
 class TransactionRejected extends TransactionException {
   /// Default Constructor.
-  TransactionRejected(Object id)
+  TransactionRejected(String id)
       : super._(
           id,
           'Transaction on data with id "$id" was rejected by the server.',
@@ -32,7 +32,7 @@ class TransactionRejected extends TransactionException {
 /// happen, if the id of the returned data does not match the transaction id.
 class TransactionInvalid extends TransactionException {
   /// Creates an [TransactionInvalid] exception for transaction with invalid id.
-  TransactionInvalid.invalidId(Object id)
+  TransactionInvalid.invalidId(String id)
       : super._(
           id,
           'The updated data must have the same id as the transaction ($id).',

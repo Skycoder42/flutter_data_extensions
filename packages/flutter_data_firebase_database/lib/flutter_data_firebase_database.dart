@@ -8,7 +8,4 @@ export 'src/server_values/server_incrementable.dart';
 export 'src/server_values/server_timestamp.dart';
 export 'src/stream/errors/authentication_revoked.dart';
 export 'src/stream/errors/remote_cancellation.dart';
-export 'src/stream/stream_controller_base.dart' hide StreamControllerBase;
-export 'src/transactions/transaction.dart'
-    hide DataWithHeaders, CreateClientFn, Transaction;
 export 'src/transactions/transaction_rejected.dart';

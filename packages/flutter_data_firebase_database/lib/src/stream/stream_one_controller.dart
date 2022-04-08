@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:flutter_data/flutter_data.dart';
 import 'package:meta/meta.dart';
 

@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -9,13 +11,6 @@ import '../firebase_database_adapter.dart';
 import '../serialization/firebase_value_transformer.dart';
 import 'etag_constants.dart';
 import 'transaction_rejected.dart';
-
-/// The transaction function definition.
-///
-/// All transaction get either the [data] or null and must return data or null.
-/// If data is returned, it's [DataModel.id] must be the same as the
-/// transaction id. If this method throws, the transaction is aborted.
-typedef TransactionFn<T extends DataModel<T>> = FutureOr<T?> Function(T? data);
 
 @internal
 typedef CreateClientFn = http.Client Function();
@@ -39,7 +34,7 @@ class Transaction<T extends DataModel<T>> {
   });
 
   Future<T?> call(
-    Object id,
+    String id,
     TransactionFn<T> transaction, {
     Map<String, dynamic>? params,
     Map<String, String>? headers,
@@ -100,7 +95,7 @@ class Transaction<T extends DataModel<T>> {
     throw error;
   }
 
-  OnDataError<R> _createOnCommitError<R>(Object id) => (DataException error) {
+  OnDataError<R> _createOnCommitError<R>(String id) => (DataException error) {
         if (error.statusCode == 412) {
           throw TransactionRejected(id);
         }
@@ -109,7 +104,7 @@ class Transaction<T extends DataModel<T>> {
       };
 
   Future<DataWithHeaders<T>> _findOneWithHeaders(
-    Object id, {
+    String id, {
     required Map<String, dynamic>? params,
     required Map<String, String>? headers,
     required OnData<T>? onSuccess,
@@ -169,7 +164,7 @@ class Transaction<T extends DataModel<T>> {
   }
 
   void _validateTransaction({
-    required Object id,
+    required String id,
     required T? updatedModel,
     required T? originalModel,
   }) {
