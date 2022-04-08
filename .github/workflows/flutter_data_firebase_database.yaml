@@ -24,7 +24,8 @@ jobs:
       buildRunner: true
       publishExclude: >-
         [
-          "lib/src/.gitignore"
+          "lib/src/.gitignore",
+          "example/lib/.gitignore"
         ]
       unitTestPaths: test/unit
       coverageExclude: >-
@@ -34,3 +35,20 @@ jobs:
     secrets:
       integrationTestEnvVars: |
         FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+
+  cd:
+    name: CD
+    uses: Skycoder42/dart_test_tools/.github/workflows/publish.yml@main
+    needs:
+      - ci
+    with:
+      workingDirectory: packages/flutter_data_firebase_database
+      buildRunner: true
+      publishExclude: >-
+        [
+          "lib/src/.gitignore",
+          "example/lib/.gitignore"
+        ]
+      tagPrefix: flutter_data_firebase_database/v
+    secrets:
+      PUB_DEV_CREDENTIALS: ${{ secrets.PUB_DEV_CREDENTIALS }}
