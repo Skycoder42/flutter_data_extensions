@@ -1,3 +1,6 @@
 {
-  "dart.runPubGetOnPubspecChanges": false
+  "dart.runPubGetOnPubspecChanges": false,
+  "cSpell.words": [
+    "randombytes"
+  ]
 }
