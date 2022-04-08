@@ -20,7 +20,7 @@ class MockClient extends Mock implements Client {}
 class MockResponse extends Mock implements Response {}
 
 abstract class TransactionCallable<T extends DataModel<T>> {
-  FutureOr<T?> call(T? data);
+  FutureOr<T?> call(String id, T? data);
 }
 
 class MockTransactionCallable extends Mock
@@ -98,7 +98,7 @@ void main() {
       when(() => mockResponse.headers).thenReturn(const {});
       when(() => mockResponse.body).thenReturn('null');
 
-      when(() => mockTransaction.call(any())).thenReturn(null);
+      when(() => mockTransaction.call(any(), any())).thenReturn(null);
 
       sut = Transaction(
         adapter: mockAdapter,
@@ -135,7 +135,7 @@ void main() {
 
         verifyInOrder([
           () => mockAdapter.deserialize(any(that: isNull)),
-          () => mockTransaction.call(any(that: isNull)),
+          () => mockTransaction.call(id, any(that: isNull)),
         ]);
       });
 
@@ -150,7 +150,7 @@ void main() {
 
         verifyInOrder([
           () => mockAdapter.deserialize(42),
-          () => mockTransaction.call(testData),
+          () => mockTransaction.call(id, testData),
         ]);
       });
 
@@ -166,7 +166,7 @@ void main() {
 
         verifyInOrder([
           () => mockAdapter.deserialize({'id': id, 'data': 11}),
-          () => mockTransaction.call(testData),
+          () => mockTransaction.call(id, testData),
         ]);
       });
 
@@ -177,7 +177,7 @@ void main() {
 
         await sut(id, mockTransaction);
 
-        verify(() => mockTransaction.call(any(that: isNull)));
+        verify(() => mockTransaction.call(id, any(that: isNull)));
         verifyNever(() => mockAdapter.deserialize(any()));
       });
 
@@ -186,7 +186,7 @@ void main() {
 
         await sut(id, mockTransaction);
 
-        verify(() => mockTransaction.call(any(that: isNull)));
+        verify(() => mockTransaction.call(id, any(that: isNull)));
         verifyNever(() => mockAdapter.deserialize(any()));
       });
 
@@ -208,7 +208,7 @@ void main() {
 
         verifyInOrder([
           () => mockOnSuccess.call(testData1),
-          () => mockTransaction.call(testData2),
+          () => mockTransaction.call(id, testData2),
         ]);
       });
 
@@ -288,7 +288,7 @@ void main() {
                       ),
                 ),
               ),
-          () => mockTransaction.call(testData),
+          () => mockTransaction.call(id, testData),
         ]);
       });
     });
@@ -302,7 +302,7 @@ void main() {
 
           // header should be found case insensitive
           when(() => mockResponse.headers).thenReturn({'EtAg': eTag});
-          when(() => mockTransaction.call(any())).thenReturn(testData);
+          when(() => mockTransaction.call(any(), any())).thenReturn(testData);
           when(
             () => mockAdapter.save(
               any(),
@@ -333,7 +333,7 @@ void main() {
             'if headers did not contain etag', () async {
           final testData = TestDataModel(id: id, data: 1);
 
-          when(() => mockTransaction.call(any())).thenReturn(testData);
+          when(() => mockTransaction.call(any(), any())).thenReturn(testData);
 
           await sut(id, mockTransaction);
 
@@ -351,7 +351,7 @@ void main() {
             () async {
           final testData = TestDataModel(id: 'another-id', data: 1);
 
-          when(() => mockTransaction.call(any())).thenReturn(testData);
+          when(() => mockTransaction.call(any(), any())).thenReturn(testData);
 
           await expectLater(
             () => sut.call(id, mockTransaction),
@@ -373,7 +373,7 @@ void main() {
           () async {
             final testData = TestDataModel(id: id, data: 1);
 
-            when(() => mockTransaction.call(any())).thenReturn(testData);
+            when(() => mockTransaction.call(any(), any())).thenReturn(testData);
 
             await sut(id, mockTransaction);
 
@@ -403,7 +403,7 @@ void main() {
           final mockOnError = MockOnDataErrorCallable();
           final testData = TestDataModel(id: id, data: 1);
 
-          when(() => mockTransaction.call(any())).thenReturn(testData);
+          when(() => mockTransaction.call(any(), any())).thenReturn(testData);
 
           await sut(
             id,

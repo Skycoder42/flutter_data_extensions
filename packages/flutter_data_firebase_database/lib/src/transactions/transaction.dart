@@ -52,7 +52,7 @@ class Transaction<T extends DataModel<T>> {
     );
 
     final eTag = _findETagHeader(response.headers);
-    final updatedModel = await transaction(response.data);
+    final updatedModel = await transaction(id, response.data);
     _validateTransaction(
       id: id,
       updatedModel: updatedModel,

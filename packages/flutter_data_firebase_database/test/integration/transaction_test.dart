@@ -34,7 +34,8 @@ void main() {
       (fixture) async {
         final result = await sut.transaction(
           '_1',
-          (data) {
+          (id, data) {
+            expect(id, '_1');
             expect(data, fixture.item1);
             return fixture.item2;
           },
@@ -48,7 +49,8 @@ void main() {
       expect(
         () => sut.transaction(
           testId,
-          (data) async {
+          (id, data) async {
+            expect(id, testId);
             expect(data, isNull);
             await sut.save(TestModel(id: testId, name: 'external-modify'));
             return TestModel(id: testId, name: 'commit');

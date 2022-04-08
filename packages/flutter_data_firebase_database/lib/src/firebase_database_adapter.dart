@@ -22,8 +22,11 @@ typedef UnsupportedEventCb = void Function(String event, String? path);
 ///
 /// All transaction get either the [data] or null and must return data or null.
 /// If data is returned, it's [DataModel.id] must be the same as the
-/// transaction id. If this method throws, the transaction is aborted.
-typedef TransactionFn<T extends DataModel<T>> = FutureOr<T?> Function(T? data);
+/// transaction [id]. If this method throws, the transaction is aborted.
+typedef TransactionFn<T extends DataModel<T>> = FutureOr<T?> Function(
+  String id,
+  T? data,
+);
 
 /// A [RemoteAdapter] you can use to add the firebase realtime database as
 /// backend for a repository.
