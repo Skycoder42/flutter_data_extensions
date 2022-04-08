@@ -12,7 +12,7 @@ An extension package to `flutter_data` that adds a remote adapter to connect wit
   * [2. Adjust your DataModel](#2-adjust-your-datamodel)
 - [Documentation](#documentation)
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+<small><i><a href='https://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 ## Features
 - Implements a `RemoteAdapter` that is able to read and write data from and to a firebase realtime database.
