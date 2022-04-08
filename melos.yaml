@@ -17,4 +17,7 @@ scripts:
     > .git/hooks/pre-commit
     && chmod a+x .git/hooks/pre-commit"
 
-  hooks:run: dart pub global run melos exec -c1 -- dart run dart_pre_commit
+  hooks:run: >-
+    dart pub global run melos exec
+    --depends-on=dart_pre_commit -c1 --
+    dart run dart_pre_commit
