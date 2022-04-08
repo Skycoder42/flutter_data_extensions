@@ -1,5 +1,5 @@
 name: flutter_data_firebase_database
-description: A starting point for Dart libraries or applications.
+description: An extension package to flutter_data that adds a remote adapter to connect with the firebase realtime database.
 version: 1.0.0
 homepage: https://github.com/Skycoder42/flutter_data_extensions
 
