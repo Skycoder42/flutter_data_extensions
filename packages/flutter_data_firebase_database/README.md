@@ -1,4 +1,7 @@
 # flutter_data_firebase_database
+[![CI/CD for flutter_data_firebase_database](https://github.com/Skycoder42/flutter_data_extensions/actions/workflows/flutter_data_firebase_database.yaml/badge.svg)](https://github.com/Skycoder42/flutter_data_extensions/actions/workflows/flutter_data_firebase_database.yaml)
+[![Pub Version](https://img.shields.io/pub/v/flutter_data_firebase_database)](https://pub.dev/packages/flutter_data_firebase_database)
+
 An extension package to `flutter_data` that adds a remote adapter to connect with the firebase realtime database.
 
 ## Table of Contents
