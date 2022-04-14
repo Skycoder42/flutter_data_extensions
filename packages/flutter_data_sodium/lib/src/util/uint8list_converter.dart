@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
+@internal
 class Uint8ListConverter implements JsonConverter<Uint8List, String> {
   const Uint8ListConverter();
 

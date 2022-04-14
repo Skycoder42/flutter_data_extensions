@@ -9,6 +9,7 @@ import '../util/uint8list_converter.dart';
 part 'encrypted_data.freezed.dart';
 part 'encrypted_data.g.dart';
 
+@internal
 @freezed
 class EncryptedData with _$EncryptedData {
   @Uint8ListConverter()

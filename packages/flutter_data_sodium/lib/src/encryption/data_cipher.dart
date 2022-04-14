@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:sodium/sodium.dart';
 
 import '../key_management/key_manager.dart';
 import 'encrypted_data.dart';
 
+@internal
 class DataCipher {
   static const _idJsonKey = 'id';
 
