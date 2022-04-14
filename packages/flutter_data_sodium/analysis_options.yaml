@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - "**.freezed.dart"
     - "**.g.dart"
+    - "lib/main.data.dart"
 
 linter:
   rules:
