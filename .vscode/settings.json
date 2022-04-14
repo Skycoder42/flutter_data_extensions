@@ -1,6 +1,8 @@
 {
   "dart.runPubGetOnPubspecChanges": false,
   "cSpell.words": [
-    "randombytes"
+    "pwhash",
+    "randombytes",
+    "subkey"
   ]
 }

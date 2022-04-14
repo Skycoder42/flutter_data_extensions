@@ -7,6 +7,8 @@ import '../key_management/key_manager.dart';
 import 'encrypted_data.dart';
 
 class DataCipher {
+  static const _idJsonKey = 'id';
+
   final Sodium sodium;
   final KeyManager keyManager;
 
@@ -16,12 +18,18 @@ class DataCipher {
   });
 
   EncryptedData encrypt(String type, Map<String, dynamic> jsonData) {
-    final id = jsonData.remove('id') as String?;
-    final keyInfo = keyManager.keyForType(type);
+    final id = jsonData[_idJsonKey] as Object?;
+    final jsonDataWithoutId = <String, dynamic>{
+      for (final entry in jsonData.entries)
+        if (entry.key != _idJsonKey) entry.key: entry.value,
+    };
+
+    final keyInfo =
+        keyManager.remoteKeyForType(type, sodium.crypto.aead.keyBytes);
     final nonce = sodium.randombytes.buf(sodium.crypto.aead.nonceBytes);
 
     final cipherData = sodium.crypto.aead.encryptDetached(
-      message: _jsonToBytes(jsonData),
+      message: _jsonToBytes(jsonDataWithoutId),
       nonce: nonce,
       key: keyInfo.secureKey,
       additionalData: _getAdForId(id),
@@ -38,7 +46,11 @@ class DataCipher {
   }
 
   dynamic decrypt(String type, EncryptedData encryptedData) {
-    final secureKey = keyManager.keyForTypeAndId(type, encryptedData.keyId);
+    final secureKey = keyManager.remoteKeyForTypeAndId(
+      type,
+      encryptedData.keyId,
+      sodium.crypto.aead.keyBytes,
+    );
 
     final plainData = sodium.crypto.aead.decryptDetached(
       cipherText: encryptedData.cipherText,
@@ -52,32 +64,29 @@ class DataCipher {
     if (plainJson is Map<String, dynamic>) {
       return <String, dynamic>{
         ...plainJson,
-        'id': encryptedData.id,
+        _idJsonKey: encryptedData.id,
       };
     } else {
       return plainJson;
     }
   }
 
-  Uint8List? _getAdForId(String? id, [bool? hasAd]) {
+  Uint8List? _getAdForId(Object? id, [bool? hasAd]) {
     if (hasAd ?? id != null) {
       assert(
         id != null,
-        'Invalid cipher data. Expected an id but none was given',
+        'Invalid cipher data. Expected an id but none was given.',
       );
 
-      return _stringToBytes(id!);
+      return _jsonToBytes(id);
     } else {
       return null;
     }
   }
 
-  Uint8List _stringToBytes(String data) => data.toCharArray().unsignedView();
-
-  String _bytesToString(Uint8List bytes) => bytes.signedView().toDartString();
-
   Uint8List _jsonToBytes(dynamic jsonData) =>
-      _stringToBytes(json.encode(jsonData));
+      json.encode(jsonData).toCharArray().unsignedView();
 
-  dynamic _bytesToJson(Uint8List bytes) => json.decode(_bytesToString(bytes));
+  dynamic _bytesToJson(Uint8List bytes) =>
+      json.decode(bytes.signedView().toDartString());
 }

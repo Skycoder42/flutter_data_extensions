@@ -1,8 +1,10 @@
+// coverage:ignore-file
+
 import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'uint8list_converter.dart';
+import '../util/uint8list_converter.dart';
 
 part 'encrypted_data.freezed.dart';
 part 'encrypted_data.g.dart';
@@ -11,7 +13,7 @@ part 'encrypted_data.g.dart';
 class EncryptedData with _$EncryptedData {
   @Uint8ListConverter()
   const factory EncryptedData({
-    required String? id,
+    required Object? id,
     required Uint8List cipherText,
     required Uint8List mac,
     required Uint8List nonce,
