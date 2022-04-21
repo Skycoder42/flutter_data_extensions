@@ -27,4 +27,7 @@ jobs:
           "lib/src/.gitignore"
         ]
       unitTestPaths: test/unit
+      coverageExclude: >-
+        "**/*.freezed.dart"
+        "**/*.g.dart"
       integrationTestPaths: test/integration
