@@ -71,6 +71,7 @@ void main() {
       when(() => mockCrypto.shortHash).thenReturn(mockShortHash);
 
       when(() => mockKdf.keyBytes).thenReturn(kdfKeyBytes);
+      when(() => mockShortHash.bytes).thenReturn(8);
 
       sut = SutKeyManager(
         mock: mockKeyManager,
@@ -113,7 +114,11 @@ void main() {
           );
 
       void _whenHashThenReturn(int keyId) => _whenHash().thenReturn(
-            (ByteData(8)..setUint64(0, keyId)).buffer.asUint8List(),
+            (ByteData(8)
+                  ..setUint32(0, keyId ^ 42)
+                  ..setUint32(4, 42))
+                .buffer
+                .asUint8List(),
           );
 
       setUp(() {
@@ -147,6 +152,7 @@ void main() {
 
           expect(key, repositoryRotKey);
           verifyInOrder([
+            () => mockShortHash.bytes,
             () => mockShortHash.keyBytes,
             () => mockKdf.deriveFromKey(
                   masterKey: masterKey,
@@ -186,6 +192,22 @@ void main() {
           verifyNoMoreInteractions(mockShortHash);
         });
 
+        test('asserts if shortHash.bytes is not 8', () {
+          const keyId = 111;
+          const keyLength = 50;
+
+          when(() => mockShortHash.bytes).thenReturn(42);
+
+          expect(
+            () => sut.remoteKeyForTypeAndId(testType, keyId, keyLength),
+            throwsA(isA<AssertionError>()),
+          );
+
+          verify(() => mockShortHash.bytes);
+          verifyNoMoreInteractions(mockKdf);
+          verifyNoMoreInteractions(mockShortHash);
+        });
+
         test('disposes typeHashingKey if shortHash fails', () {
           const keyId = 111;
           const keyLength = 50;
@@ -201,6 +223,7 @@ void main() {
           );
 
           verifyInOrder([
+            () => mockShortHash.bytes,
             () => mockShortHash.keyBytes,
             () => mockKdf.deriveFromKey(
                   masterKey: masterKey,
@@ -237,6 +260,7 @@ void main() {
           );
 
           verifyInOrder([
+            () => mockShortHash.bytes,
             () => mockShortHash.keyBytes,
             () => mockKdf.deriveFromKey(
                   masterKey: masterKey,
@@ -302,6 +326,7 @@ void main() {
         expect(keyInfo.keyId, fixture.item2);
         expect(keyInfo.secureKey, repositoryRotKey);
         verifyInOrder([
+          () => mockShortHash.bytes,
           () => mockShortHash.keyBytes,
           () => mockKdf.deriveFromKey(
                 masterKey: masterKey,

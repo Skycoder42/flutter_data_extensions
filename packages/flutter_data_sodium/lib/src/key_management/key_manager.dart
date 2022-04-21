@@ -68,28 +68,34 @@ abstract class KeyManager {
   @protected
   Future<SecureKey> loadRemoteMasterKey(int keyLength);
 
-  SecureKey _getRepositoryKey(String type) => sodium.crypto.kdf.deriveFromKey(
-        masterKey: _masterKey,
-        context: _repositoryKeyContext,
-        subkeyId: _subkeyIdForType(type),
-        subkeyLen: sodium.crypto.kdf.keyBytes,
-      );
+  @protected
+  int subkeyIdForType(String type) {
+    assert(
+      sodium.crypto.shortHash.bytes == 8,
+      'Cannot generate subkeyId if shortHash.bytes is not 8',
+    );
 
-  int _subkeyIdForType(String type) {
     final typeHashingKey = _getTypeHashingKey();
     try {
-      return sodium.crypto
+      final shortHashByteData = sodium.crypto
           .shortHash(
             message: type.toCharArray().unsignedView(),
             key: typeHashingKey,
           )
           .buffer
-          .asByteData()
-          .getUint64(0);
+          .asByteData();
+      return shortHashByteData.getUint32(0) ^ shortHashByteData.getUint32(4);
     } finally {
       typeHashingKey.dispose();
     }
   }
+
+  SecureKey _getRepositoryKey(String type) => sodium.crypto.kdf.deriveFromKey(
+        masterKey: _masterKey,
+        context: _repositoryKeyContext,
+        subkeyId: subkeyIdForType(type),
+        subkeyLen: sodium.crypto.kdf.keyBytes,
+      );
 
   SecureKey _getTypeHashingKey() => sodium.crypto.kdf.deriveFromKey(
         masterKey: _masterKey,
