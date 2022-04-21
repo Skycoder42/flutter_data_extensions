@@ -6,7 +6,8 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:clock/clock.dart';
-import 'package:flutter_data_sodium/src/key_management/parallel_master_key_computation.dart';
+import 'package:flutter_data_sodium/src/key_management/isolate/parallel_computation_failure.dart';
+import 'package:flutter_data_sodium/src/key_management/isolate/parallel_master_key_computation.dart';
 import 'package:flutter_data_sodium/src/key_management/passphrase_based_key_manager.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sodium/sodium.dart';
