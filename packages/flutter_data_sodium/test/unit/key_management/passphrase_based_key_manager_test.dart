@@ -33,9 +33,6 @@ class SutPassphraseBasedKeyManager extends PassphraseBasedKeyManager {
         );
 
   @override
-  Future<SecureKey> loadLocalKey(int keyLength) => mock.loadLocalKey(keyLength);
-
-  @override
   Future<MasterKeyComponents> loadMasterKeyComponents() =>
       mock.loadMasterKeyComponents();
 }

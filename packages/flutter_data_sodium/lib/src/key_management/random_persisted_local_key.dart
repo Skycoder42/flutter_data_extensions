@@ -4,7 +4,6 @@ import 'package:sodium/sodium.dart';
 import 'key_manager.dart';
 
 mixin RandomPersistedLocalKey on KeyManager {
-  @override
   @nonVirtual
   Future<SecureKey> loadLocalKey(int keyLength) async {
     final key = await loadKeyFromStorage();

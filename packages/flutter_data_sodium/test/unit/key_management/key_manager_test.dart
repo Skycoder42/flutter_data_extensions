@@ -35,9 +35,6 @@ class SutKeyManager extends KeyManager {
         );
 
   @override
-  Future<SecureKey> loadLocalKey(int keyLength) => mock.loadLocalKey(keyLength);
-
-  @override
   Future<SecureKey> loadRemoteMasterKey(int keyLength) =>
       mock.loadRemoteMasterKey(keyLength);
 }

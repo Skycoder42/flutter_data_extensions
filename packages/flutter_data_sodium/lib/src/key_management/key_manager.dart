@@ -30,8 +30,6 @@ abstract class KeyManager {
     c.Clock? clock,
   }) : clock = clock ?? c.clock;
 
-  Future<SecureKey> loadLocalKey(int keyLength);
-
   KeyInfo remoteKeyForType(String type, int keyLength) {
     final keyId = _keyIdForDate(clock.now());
     final secureKey = remoteKeyForTypeAndId(type, keyId, keyLength);
