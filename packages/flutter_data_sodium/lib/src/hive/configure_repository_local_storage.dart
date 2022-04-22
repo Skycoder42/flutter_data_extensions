@@ -3,11 +3,11 @@ import 'package:sodium/sodium.dart';
 
 import 'sodium_hive_local_storage.dart';
 
-typedef SodiumFn = Sodium Function(Ref ref);
+typedef CreateFn<T> = T Function(Ref ref);
 
 Override configureRepositoryLocalStorageSodium({
-  required Sodium sodium,
-  required SecureKey encryptionKey,
+  required CreateFn<Sodium> sodium,
+  required CreateFn<SecureKey> encryptionKey,
   required FutureFn<String> baseDirFn,
   bool? clear,
 }) =>
@@ -15,8 +15,8 @@ Override configureRepositoryLocalStorageSodium({
       Provider(
         (ref) => SodiumHiveLocalStorage(
           hive: ref.read(hiveProvider),
-          sodium: sodium,
-          encryptionKey: encryptionKey,
+          sodium: sodium(ref),
+          encryptionKey: encryptionKey(ref),
           baseDirFn: baseDirFn,
           clear: clear,
         ),

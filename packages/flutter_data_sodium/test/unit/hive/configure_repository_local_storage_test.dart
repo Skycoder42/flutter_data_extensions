@@ -45,8 +45,8 @@ void main() {
 
     test('creates override with SodiumHiveLocalStorage provider', () {
       final sutOverride = configureRepositoryLocalStorageSodium(
-        sodium: mockSodium,
-        encryptionKey: fakeEncryptionKey,
+        sodium: (_) => mockSodium,
+        encryptionKey: (_) => fakeEncryptionKey,
         baseDirFn: baseDirFn,
       );
 
