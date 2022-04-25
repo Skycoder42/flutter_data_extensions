@@ -80,9 +80,6 @@ class SutKeyManager extends PassphraseBasedKeyManager
       };
 
   @override
-  Future<SecureKey> loadLocalKey(int keyLength) => throw UnimplementedError();
-
-  @override
   Future<MasterKeyComponents> loadMasterKeyComponents() =>
       throw UnimplementedError();
 }
