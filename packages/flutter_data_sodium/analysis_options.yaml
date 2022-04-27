@@ -4,7 +4,8 @@ analyzer:
   exclude:
     - "**.freezed.dart"
     - "**.g.dart"
-    - "lib/main.data.dart"
+    - lib/main.data.dart
+    - test/integration/setup/sodium_setup_js.dart
 
 linter:
   rules:

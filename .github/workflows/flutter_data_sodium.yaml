@@ -31,3 +31,10 @@ jobs:
         "**/*.freezed.dart"
         "**/*.g.dart"
       integrationTestPaths: test/integration
+      integrationTestSetup: >-
+        {
+          "linux": "sudo apt-get -qq install libsodium-dev",
+          "windows": "dart run tool/download_sodium_windows.dart",
+          "macos": "brew install libsodium",
+          "web": "dart run tool/download_sodium_web.dart"
+        }
