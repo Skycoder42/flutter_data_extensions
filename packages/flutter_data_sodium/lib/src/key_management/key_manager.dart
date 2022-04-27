@@ -55,6 +55,7 @@ abstract class KeyManager {
     _masterKey = await loadRemoteMasterKey(sodium.crypto.kdf.keyBytes);
   }
 
+  @mustCallSuper
   void dispose() {
     _masterKey.dispose();
     for (final key in _repositoryRotKeys.values) {

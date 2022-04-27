@@ -55,6 +55,12 @@ class TestWebServer {
 
   Future<void> _handleServerRequest(HttpRequest request) async {
     request.response.headers.add('Access-Control-Allow-Origin', '*');
+    request.response.headers.add('Access-Control-Allow-Headers', '*');
+
+    if (request.method == 'OPTIONS') {
+      await request.response.close();
+      return;
+    }
 
     if (_handlerQueue.isEmpty) {
       request.response.statusCode = 500;

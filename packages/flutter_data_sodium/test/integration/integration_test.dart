@@ -1,24 +1,26 @@
-import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:http/http.dart';
 import 'package:test/test.dart';
 
 import 'server/client_messages.dart';
 import 'setup/setup.dart';
 
 void main() {
+  final masterKey = Uint8List.fromList(List.filled(32, 0));
+
   // ignore: unused_local_variable
-  final setup = Setup()..call();
+  final setup = Setup()..call(masterKey);
 
-  test('test server', () async {
-    final baseUrl = await setup.serverController.baseUrl;
-
-    await setup.serverController
-        .prepareHandler(HttpHandlerMessage(requestPath: '/test'));
+  test('get returns empty list by default', () async {
+    await setup.serverController.prepareHandler(
+      HttpHandlerMessage(
+        requestPath: '/testModels',
+      ),
+    );
 
     expect(
-      get(baseUrl.resolve('test')),
-      completion(predicate<Response>((r) => r.statusCode == HttpStatus.ok)),
+      setup.testDataRepository.findAll(),
+      completion(isEmpty),
     );
   });
 }

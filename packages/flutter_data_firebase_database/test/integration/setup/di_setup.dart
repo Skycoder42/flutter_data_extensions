@@ -22,6 +22,7 @@ mixin DiSetup on Setup {
       overrides: [
         configureRepositoryLocalStorage(
           baseDirFn: () => _testDir?.path ?? '',
+          clear: true,
         ),
       ],
     );
