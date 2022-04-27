@@ -123,63 +123,167 @@ void main() {
         ]);
       });
 
-      test('deserialize forwards data to super.deserialize if not a map', () {
-        const testKey = 'test-key';
-        const testJson = [1, true, 'tree'];
-        final testData = DeserializedData([TestDataModel(42)]);
+      group('deserialize', () {
+        test('decrypts json object and then forwards data to super.deserialize',
+            () {
+          const testType = 'test-type';
+          const testJson = {
+            'id': 42,
+            'cipherText': '',
+            'mac': '',
+            'nonce': '',
+            'hasAd': false,
+            'keyId': 111,
+          };
+          const testDecrypted = 42.42;
+          final testData = DeserializedData([TestDataModel(42)]);
 
-        when(() => sut.mockDeserialize(any(), key: any(named: 'key')))
-            .thenReturn(testData);
+          when(() => sut.type).thenReturn(testType);
+          when(() => sut.mockDeserialize(any(), key: any(named: 'key')))
+              .thenReturn(testData);
+          when<dynamic>(() => mockDataCipher.decrypt(any(), any()))
+              .thenReturn(testDecrypted);
 
-        final result = sut.deserialize(testJson, key: testKey);
+          final result = sut.deserialize(testJson);
 
-        expect(result, testData);
+          expect(result, testData);
 
-        verify(() => sut.mockDeserialize(testJson, key: testKey));
-        verifyNever<dynamic>(() => mockDataCipher.decrypt(any(), any()));
-      });
-
-      test('deserialize first decrypt and the forwards to super.deserialize',
-          () {
-        const testType = 'test-type';
-        const testJson = {
-          'id': 42,
-          'cipherText': '',
-          'mac': '',
-          'nonce': '',
-          'hasAd': false,
-          'keyId': 111,
-        };
-        const testDecrypted = 42.42;
-        final testData = DeserializedData([TestDataModel(42)]);
-
-        when(() => sut.type).thenReturn(testType);
-        when(() => sut.mockDeserialize(any(), key: any(named: 'key')))
-            .thenReturn(testData);
-        when<dynamic>(() => mockDataCipher.decrypt(any(), any()))
-            .thenReturn(testDecrypted);
-
-        final result = sut.deserialize(testJson);
-
-        expect(result, testData);
-
-        verifyInOrder<dynamic>([
-          () => mockDataCipher.decrypt(
-                testType,
-                EncryptedData(
-                  id: 42,
-                  cipherText: Uint8List(0),
-                  mac: Uint8List(0),
-                  nonce: Uint8List(0),
-                  hasAd: false,
-                  keyId: 111,
+          verifyInOrder<dynamic>([
+            () => mockDataCipher.decrypt(
+                  testType,
+                  EncryptedData(
+                    id: 42,
+                    cipherText: Uint8List(0),
+                    mac: Uint8List(0),
+                    nonce: Uint8List(0),
+                    hasAd: false,
+                    keyId: 111,
+                  ),
                 ),
-              ),
-          () => sut.mockDeserialize(
-                testDecrypted,
-                key: any(named: 'key', that: isNull),
-              ),
-        ]);
+            () => sut.mockDeserialize(
+                  testDecrypted,
+                  key: any(named: 'key', that: isNull),
+                ),
+          ]);
+        });
+
+        test('decrypts json array and then forwards data to super.deserialize',
+            () {
+          const testType = 'test-type';
+          const testJson = [
+            {
+              'id': 42,
+              'cipherText': '',
+              'mac': '',
+              'nonce': '',
+              'hasAd': false,
+              'keyId': 111,
+            },
+            {
+              'id': 43,
+              'cipherText': '',
+              'mac': '',
+              'nonce': '',
+              'hasAd': false,
+              'keyId': 111,
+            }
+          ];
+          const testDecrypted = 42.42;
+          final testData = DeserializedData([
+            TestDataModel(42),
+            TestDataModel(43),
+          ]);
+
+          when(() => sut.type).thenReturn(testType);
+          when(() => sut.mockDeserialize(any(), key: any(named: 'key')))
+              .thenReturn(testData);
+          when<dynamic>(() => mockDataCipher.decrypt(any(), any()))
+              .thenReturn(testDecrypted);
+
+          final result = sut.deserialize(testJson);
+
+          expect(result, testData);
+
+          final captured = verify(
+            () => sut.mockDeserialize(
+              captureAny(),
+              key: any(named: 'key', that: isNull),
+            ),
+          ).captured.single as Iterable;
+          expect(captured, [testDecrypted, testDecrypted]);
+
+          verifyInOrder<dynamic>([
+            () => mockDataCipher.decrypt(
+                  testType,
+                  EncryptedData(
+                    id: 42,
+                    cipherText: Uint8List(0),
+                    mac: Uint8List(0),
+                    nonce: Uint8List(0),
+                    hasAd: false,
+                    keyId: 111,
+                  ),
+                ),
+            () => mockDataCipher.decrypt(
+                  testType,
+                  EncryptedData(
+                    id: 43,
+                    cipherText: Uint8List(0),
+                    mac: Uint8List(0),
+                    nonce: Uint8List(0),
+                    hasAd: false,
+                    keyId: 111,
+                  ),
+                ),
+          ]);
+        });
+
+        test('forwards null data to super.deserialize', () {
+          const testType = 'test-type';
+          const testKey = 'test-key';
+          const testData = DeserializedData<TestDataModel>([]);
+
+          when(() => sut.type).thenReturn(testType);
+          when(() => sut.mockDeserialize(any(), key: any(named: 'key')))
+              .thenReturn(testData);
+
+          final result = sut.deserialize(null, key: testKey);
+
+          expect(result, testData);
+
+          verify(() => sut.mockDeserialize(null, key: testKey));
+          verifyNever<dynamic>(() => mockDataCipher.decrypt(any(), any()));
+        });
+
+        test('calls super.deserialize with null for empty strings', () {
+          const testType = 'test-type';
+          const testKey = 'test-key';
+          const testData = DeserializedData<TestDataModel>([]);
+
+          when(() => sut.type).thenReturn(testType);
+          when(() => sut.mockDeserialize(any(), key: any(named: 'key')))
+              .thenReturn(testData);
+
+          final result = sut.deserialize('', key: testKey);
+
+          expect(result, testData);
+
+          verify(() => sut.mockDeserialize(null, key: testKey));
+          verifyNever<dynamic>(() => mockDataCipher.decrypt(any(), any()));
+        });
+
+        test('throws for other data values', () {
+          const testType = 'test-type';
+          when(() => sut.type).thenReturn(testType);
+
+          expect(
+            () => sut.deserialize(42),
+            throwsFormatException,
+          );
+
+          verifyNever(() => sut.mockDeserialize(any(), key: any(named: 'key')));
+          verifyNever<dynamic>(() => mockDataCipher.decrypt(any(), any()));
+        });
       });
     });
   });

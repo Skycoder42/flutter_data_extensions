@@ -29,11 +29,13 @@ class _TestKeyManager extends KeyManager {
 mixin KeyManagerSetup {
   Future<KeyManager> loadKeyManager(
     Sodium sodium,
-    Uint8List masterKeyBytes,
-  ) async {
+    Uint8List masterKeyBytes, [
+    Clock? clock,
+  ]) async {
     final keyManager = _TestKeyManager(
       sodium: sodium,
       masterKey: SecureKey.fromList(sodium, masterKeyBytes),
+      clock: clock,
     );
     await keyManager.initialize();
     addTearDown(keyManager.dispose);

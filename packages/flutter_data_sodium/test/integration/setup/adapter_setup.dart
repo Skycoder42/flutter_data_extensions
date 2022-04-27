@@ -26,7 +26,6 @@ mixin AdapterSetup {
           keyBytes,
         ),
         baseDirFn: () => testDir?.path ?? '',
-        clear: true,
       );
 
   Future<void> initRepositories(ProviderContainer providerContainer) async {

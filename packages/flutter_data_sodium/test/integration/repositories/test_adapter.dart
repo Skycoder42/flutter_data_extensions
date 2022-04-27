@@ -4,10 +4,6 @@ import 'package:flutter_data_sodium/flutter_data_sodium.dart';
 import 'package:sodium/sodium.dart';
 
 mixin TestAdapter<T extends DataModel<T>> on SodiumRemoteAdapter<T> {
-  static late final baseUrlProvider = Provider<Uri>(
-    (ref) => throw UnimplementedError(),
-  );
-
   static late final sodiumProvider = Provider<Sodium>(
     (ref) => throw UnimplementedError(),
   );
@@ -17,7 +13,7 @@ mixin TestAdapter<T extends DataModel<T>> on SodiumRemoteAdapter<T> {
   );
 
   @override
-  String get baseUrl => read(baseUrlProvider).toString();
+  String get baseUrl => 'http://localhost';
 
   @override
   Sodium get sodium => read(sodiumProvider);
