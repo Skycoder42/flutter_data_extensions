@@ -14,6 +14,8 @@ import '../repositories/test_repository.dart';
 mixin AdapterSetup {
   late Repository<TestModel> testDataRepository;
 
+  bool get keepDataOnce;
+
   Override createLocalStorageOverride(
     Directory? testDir,
     Sodium sodium,
@@ -34,7 +36,9 @@ mixin AdapterSetup {
 
     testDataRepository = providerContainer.read(testModelsRepositoryProvider);
     addTearDown(() async {
-      await testDataRepository.clear();
+      if (!keepDataOnce) {
+        await testDataRepository.clear();
+      }
       testDataRepository.dispose();
     });
   }

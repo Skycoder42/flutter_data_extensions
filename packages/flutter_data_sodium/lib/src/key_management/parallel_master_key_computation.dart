@@ -9,12 +9,12 @@ typedef CreateSodiumFn = FutureOr<Sodium> Function();
 
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
-class _IsolateMessage {
+class _ComputeMasterKeyMessage {
   final CreateSodiumFn createSodiumFn;
   final MasterKeyComponents masterKeyComponents;
   final int keyLength;
 
-  const _IsolateMessage(
+  const _ComputeMasterKeyMessage(
     this.createSodiumFn,
     this.masterKeyComponents,
     this.keyLength,
@@ -22,7 +22,7 @@ class _IsolateMessage {
 }
 
 mixin ParallelMasterKeyComputation on PassphraseBasedKeyManager {
-  static Future<dynamic> _runInIsolate(_IsolateMessage message) async {
+  static Future<dynamic> _runInIsolate(_ComputeMasterKeyMessage message) async {
     final sodium = await message.createSodiumFn();
     final key = PassphraseBasedKeyManager.computeMasterKey(
       sodium: sodium,
@@ -45,9 +45,10 @@ mixin ParallelMasterKeyComputation on PassphraseBasedKeyManager {
     MasterKeyComponents masterKeyComponents,
     int keyLength,
   ) async {
-    final dynamic nativeHandle = await compute<_IsolateMessage, dynamic>(
+    final dynamic nativeHandle =
+        await compute<_ComputeMasterKeyMessage, dynamic>(
       _runInIsolate,
-      _IsolateMessage(
+      _ComputeMasterKeyMessage(
         sodiumFactory,
         masterKeyComponents,
         keyLength,

@@ -7,12 +7,15 @@ import 'package:test/test.dart';
 
 mixin SodiumSetup {
   @protected
-  Future<Sodium> loadSodium() async {
+  Future<Sodium> loadSodium({
+    void Function(dynamic, Matcher) expect = expect,
+    void Function(String) printOnFailure = printOnFailure,
+  }) async {
     String libSodiumPath;
     if (Platform.isLinux) {
       final ldConfigRes = await Process.run('ldconfig', const ['-p']);
       printOnFailure('stderr: ${ldConfigRes.stderr}');
-      expect(ldConfigRes.exitCode, 0);
+      expect(ldConfigRes.exitCode, equals(0));
       printOnFailure('stdout: ${ldConfigRes.stdout}');
       libSodiumPath = (ldConfigRes.stdout as String)
           .split('\n')

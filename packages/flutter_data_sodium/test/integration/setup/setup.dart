@@ -20,13 +20,21 @@ class Setup with HttpSetup, SodiumSetup, KeyManagerSetup, AdapterSetup {
 
   late ProviderContainer providerContainer;
 
+  @override
+  bool keepDataOnce = false;
+
   void call(Uint8List masterKeyBytes, [Clock? clock]) {
     setUpAll(() async {
       _sodium = await loadSodium();
     });
 
     setUp(() async {
-      _testDir = _kIsWeb ? null : await Directory.systemTemp.createTemp();
+      if (keepDataOnce) {
+        print('> using data of previous test');
+        keepDataOnce = false;
+      } else {
+        _testDir = _kIsWeb ? null : await Directory.systemTemp.createTemp();
+      }
 
       final keyManager = await loadKeyManager(_sodium, masterKeyBytes, clock);
 
@@ -46,7 +54,11 @@ class Setup with HttpSetup, SodiumSetup, KeyManagerSetup, AdapterSetup {
       await providerContainer.read(hiveLocalStorageProvider).hive.close();
       providerContainer.dispose();
 
-      await _testDir?.delete(recursive: true);
+      if (keepDataOnce) {
+        print('> keeping data for next test');
+      } else {
+        await _testDir?.delete(recursive: true);
+      }
     });
   }
 }

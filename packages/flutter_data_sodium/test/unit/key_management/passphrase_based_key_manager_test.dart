@@ -1,9 +1,9 @@
 // ignore_for_file: invalid_use_of_protected_member
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:clock/clock.dart';
-import 'package:dart_test_tools/test.dart';
 import 'package:flutter_data_sodium/src/key_management/passphrase_based_key_manager.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sodium/sodium.dart';
@@ -33,7 +33,7 @@ class SutPassphraseBasedKeyManager extends PassphraseBasedKeyManager {
         );
 
   @override
-  Future<MasterKeyComponents> loadMasterKeyComponents() =>
+  FutureOr<MasterKeyComponents> loadMasterKeyComponents() =>
       mock.loadMasterKeyComponents();
 }
 
@@ -154,8 +154,7 @@ void main() {
           opsLimit: 444,
         );
 
-        when(() => mockSut.loadMasterKeyComponents())
-            .thenReturnAsync(components);
+        when(() => mockSut.loadMasterKeyComponents()).thenReturn(components);
 
         final key = await sut.loadRemoteMasterKey(keyLength);
 

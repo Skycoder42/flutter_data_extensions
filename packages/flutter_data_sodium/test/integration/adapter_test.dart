@@ -224,4 +224,19 @@ void main() {
       );
     });
   });
+
+  group('storage', () {
+    test('encrypts data locally', () async {
+      await sut.save(TestModel(name: 'test-data-1'), remote: false);
+      await sut.save(TestModel(name: 'test-data-2'), remote: false);
+      setup.keepDataOnce = true;
+    });
+
+    test('can decrypt stored data', () async {
+      final data = await sut.findAll(remote: false);
+      expect(data, hasLength(2));
+      expect(data, contains(TestModel(name: 'test-data-1')));
+      expect(data, contains(TestModel(name: 'test-data-2')));
+    });
+  });
 }
