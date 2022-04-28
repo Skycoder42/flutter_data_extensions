@@ -30,6 +30,7 @@ class Setup with HttpSetup, SodiumSetup, KeyManagerSetup, AdapterSetup {
 
     setUp(() async {
       if (keepDataOnce) {
+        // ignore: avoid_print
         print('> using data of previous test');
         keepDataOnce = false;
       } else {
@@ -55,6 +56,7 @@ class Setup with HttpSetup, SodiumSetup, KeyManagerSetup, AdapterSetup {
       providerContainer.dispose();
 
       if (keepDataOnce) {
+        // ignore: avoid_print
         print('> keeping data for next test');
       } else {
         await _testDir?.delete(recursive: true);
