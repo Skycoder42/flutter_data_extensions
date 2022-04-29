@@ -55,8 +55,8 @@ class SutKeyManager extends PassphraseBasedKeyManager
       ) as Future<R>;
 
   @override
-  FutureOr<MasterKeyComponents> loadMasterKeyComponents() =>
-      mock.loadMasterKeyComponents();
+  FutureOr<MasterKeyComponents> loadMasterKeyComponents(int saltLength) =>
+      mock.loadMasterKeyComponents(saltLength);
 }
 
 void main() {

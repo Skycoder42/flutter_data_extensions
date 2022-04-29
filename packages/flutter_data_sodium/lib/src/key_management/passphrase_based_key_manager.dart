@@ -81,16 +81,19 @@ abstract class PassphraseBasedKeyManager extends KeyManager {
   ///
   /// This method must be implemented by your key manager. It should always
   /// return the same components for the same remote, as otherwise data cannot
-  /// be en/decrypted. Typically, this means you will have to provide the salt,
-  /// opsLimit and memLimit consistently and let the user enter the passphrase.
+  /// be en/decrypted. Typically, this means you will have to provide the salt
+  /// (with a length of [saltLength] bytes), opsLimit and memLimit consistently
+  /// and let the user enter the passphrase.
   @protected
-  FutureOr<MasterKeyComponents> loadMasterKeyComponents();
+  FutureOr<MasterKeyComponents> loadMasterKeyComponents(int saltLength);
 
   @override
   @protected
   @nonVirtual
   Future<SecureKey> loadRemoteMasterKey(int keyLength) async {
-    final masterKeyComponents = await loadMasterKeyComponents();
+    final masterKeyComponents = await loadMasterKeyComponents(
+      sodium.crypto.pwhash.saltBytes,
+    );
     final masterKey = await deriveKey(masterKeyComponents, keyLength);
     return masterKey;
   }

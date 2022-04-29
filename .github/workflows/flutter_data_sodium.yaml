@@ -38,3 +38,19 @@ jobs:
           "macos": "brew install libsodium",
           "web": "dart run tool/download_sodium_web.dart"
         }
+
+  cd:
+    name: CD
+    uses: Skycoder42/dart_test_tools/.github/workflows/publish.yml@main
+    needs:
+      - ci
+    with:
+      workingDirectory: packages/flutter_data_sodium
+      buildRunner: true
+      publishExclude: >-
+        [
+          "lib/src/.gitignore"
+        ]
+      tagPrefix: flutter_data_sodium/v
+    secrets:
+      PUB_DEV_CREDENTIALS: ${{ secrets.PUB_DEV_CREDENTIALS }}

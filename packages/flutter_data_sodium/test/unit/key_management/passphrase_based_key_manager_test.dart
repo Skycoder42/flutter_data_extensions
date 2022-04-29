@@ -33,8 +33,8 @@ class SutPassphraseBasedKeyManager extends PassphraseBasedKeyManager {
         );
 
   @override
-  FutureOr<MasterKeyComponents> loadMasterKeyComponents() =>
-      mock.loadMasterKeyComponents();
+  FutureOr<MasterKeyComponents> loadMasterKeyComponents(int saltLength) =>
+      mock.loadMasterKeyComponents(saltLength);
 }
 
 void main() {
@@ -131,6 +131,8 @@ void main() {
     });
 
     group('instance', () {
+      const saltLength = 32;
+
       final mockSut = MockPassphraseBasedKeyManager();
       final clock = Clock.fixed(DateTime.now());
 
@@ -138,6 +140,8 @@ void main() {
 
       setUp(() {
         reset(mockSut);
+
+        when(() => mockPwhash.saltBytes).thenReturn(saltLength);
 
         sut = SutPassphraseBasedKeyManager(
           mock: mockSut,
@@ -154,13 +158,15 @@ void main() {
           opsLimit: 444,
         );
 
-        when(() => mockSut.loadMasterKeyComponents()).thenReturn(components);
+        when(() => mockSut.loadMasterKeyComponents(any()))
+            .thenReturn(components);
 
         final key = await sut.loadRemoteMasterKey(keyLength);
 
         expect(key, testKey);
         verifyInOrder([
-          () => mockSut.loadMasterKeyComponents(),
+          () => mockPwhash.saltBytes,
+          () => mockSut.loadMasterKeyComponents(saltLength),
           () => mockPwhash.call(
                 outLen: keyLength,
                 password: components.password.toCharArray(),

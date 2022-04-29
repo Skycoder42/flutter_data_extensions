@@ -41,6 +41,8 @@ class _ComputeMasterKeyMessage {
 ///
 /// class MyKeyManager extends PassphraseBasedKeyManager
 ///     with ParallelMasterKeyComputation {
+///   MyKeyManager(Sodium sodium) : super(sodium: sodium);
+///
 ///   @override
 ///   CreateSodiumFn get sodiumFactory => SodiumInit.init;
 ///

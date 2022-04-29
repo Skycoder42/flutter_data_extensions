@@ -104,7 +104,10 @@ class _TestKeyManager extends PassphraseBasedKeyManager
   }
 
   @override
-  MasterKeyComponents loadMasterKeyComponents() => masterKeyComponents;
+  MasterKeyComponents loadMasterKeyComponents(int saltLength) {
+    assert(saltLength == masterKeyComponents.salt.length);
+    return masterKeyComponents;
+  }
 
   @override
   CreateSodiumFn get sodiumFactory => _sodiumFactory;
