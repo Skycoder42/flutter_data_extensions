@@ -7,18 +7,24 @@ import 'package:sodium/sodium.dart';
 import '../key_management/key_manager.dart';
 import 'encrypted_data.dart';
 
+/// @nodoc
 @internal
 class DataCipher {
   static const _idJsonKey = 'id';
 
+  /// @nodoc
   final Sodium sodium;
+
+  /// @nodoc
   final KeyManager keyManager;
 
+  /// @nodoc
   const DataCipher({
     required this.sodium,
     required this.keyManager,
   });
 
+  /// @nodoc
   EncryptedData encrypt(String type, Map<String, dynamic> jsonData) {
     final id = jsonData[_idJsonKey] as Object?;
     final jsonDataWithoutId = <String, dynamic>{
@@ -47,6 +53,7 @@ class DataCipher {
     );
   }
 
+  /// @nodoc
   dynamic decrypt(String type, EncryptedData encryptedData) {
     final secureKey = keyManager.remoteKeyForTypeAndId(
       type,

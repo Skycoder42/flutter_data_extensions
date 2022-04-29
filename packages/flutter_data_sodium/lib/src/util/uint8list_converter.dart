@@ -4,8 +4,10 @@ import 'dart:typed_data';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
+/// @nodoc
 @internal
 class Uint8ListConverter implements JsonConverter<Uint8List, String> {
+  /// @nodoc
   const Uint8ListConverter();
 
   @override

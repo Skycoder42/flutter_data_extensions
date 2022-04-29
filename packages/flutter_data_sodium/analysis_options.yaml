@@ -6,7 +6,3 @@ analyzer:
     - "**.g.dart"
     - lib/main.data.dart
     - test/integration/setup/sodium_setup_js.dart
-
-linter:
-  rules:
-    public_member_api_docs: false

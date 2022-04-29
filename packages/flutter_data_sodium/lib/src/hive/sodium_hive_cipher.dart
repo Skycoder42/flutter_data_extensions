@@ -2,15 +2,29 @@ import 'dart:typed_data';
 
 import 'package:hive/hive.dart';
 // ignore: implementation_imports
-import 'package:hive/src/crypto/crc32.dart' as hive;
+import 'package:hive/src/crypto/crc32.dart' as hive_internal;
 import 'package:sodium/sodium.dart';
 
+/// An implementation of [HiveCipher] that uses the [SecretBox] for encryption.
+///
+/// You can use this as alternative to [HiveAesCipher] in case you do not want
+/// to rely on the correctness of their AES implementation. This class instead
+/// uses the [SecretBox.easy] algorithms to encrypt data for storage.
 class SodiumHiveCipher implements HiveCipher {
-  final Sodium sodium;
-  final SecureKey encryptionKey;
-
+  /// The length (in bytes) the [encryptionKey] must be.
+  ///
+  /// This static method uses [sodium] to get the correct key length at
+  /// runtime. You can use it to generate an encryption key of the correct
+  /// length.
   static int keyBytes(Sodium sodium) => sodium.crypto.secretBox.keyBytes;
 
+  /// The sodium instance the cipher uses.
+  final Sodium sodium;
+
+  /// The secret key used for encryption and decryption.
+  final SecureKey encryptionKey;
+
+  /// Constructor.
   SodiumHiveCipher({
     required this.sodium,
     required this.encryptionKey,
@@ -20,7 +34,7 @@ class SodiumHiveCipher implements HiveCipher {
         );
 
   @override
-  int calculateKeyCrc() => hive.Crc32.compute(
+  int calculateKeyCrc() => hive_internal.Crc32.compute(
         encryptionKey.runUnlockedSync(
           (encryptionKeyData) => sodium.crypto.genericHash(
             message: encryptionKeyData,

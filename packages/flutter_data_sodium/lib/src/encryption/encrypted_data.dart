@@ -9,9 +9,11 @@ import '../util/uint8list_converter.dart';
 part 'encrypted_data.freezed.dart';
 part 'encrypted_data.g.dart';
 
+/// @nodoc
 @internal
 @freezed
 class EncryptedData with _$EncryptedData {
+  /// @nodoc
   @Uint8ListConverter()
   const factory EncryptedData({
     required Object? id,
@@ -22,6 +24,7 @@ class EncryptedData with _$EncryptedData {
     required int keyId,
   }) = _EncryptedData;
 
+  /// @nodoc
   factory EncryptedData.fromJson(Map<String, dynamic> json) =>
       _$EncryptedDataFromJson(json);
 }
