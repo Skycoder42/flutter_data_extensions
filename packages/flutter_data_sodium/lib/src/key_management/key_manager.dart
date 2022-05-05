@@ -102,6 +102,7 @@ abstract class KeyManager {
   /// **Important:** Make sure to [dispose] all initialized key managers when
   /// not used anymore.
   Future<void> initialize() async {
+    // TODO throw better error if initialize was not called or already called
     _masterKey = await loadRemoteMasterKey(sodium.crypto.kdf.keyBytes);
   }
 
