@@ -1,0 +1,25 @@
+name: CI/CD for flutter_data_sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "*"
+    paths:
+      - "packages/flutter_data_sync/**"
+      - ".github/workflows/flutter_data_sync.yaml"
+  pull_request:
+    branches:
+      - "*"
+    paths:
+      - "packages/flutter_data_sync/**"
+      - ".github/workflows/flutter_data_sync.yaml"
+
+jobs:
+  ci:
+    name: CI
+    uses: Skycoder42/dart_test_tools/.github/workflows/dart.yml@main
+    with:
+      workingDirectory: packages/flutter_data_sync
+      unitTestPaths: test/unit
+      integrationTestPaths: test/integration
