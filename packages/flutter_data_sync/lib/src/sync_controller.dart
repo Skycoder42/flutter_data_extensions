@@ -7,7 +7,7 @@ import 'retry_state_machine.dart';
 late final syncControllerProvider = Provider.family(
   (ref, Map<String, Provider<Repository>> repositoryProviders) =>
       SyncController(
-    ref: ref,
+    read: ref.read,
     pendingOfflineTypesNotifier:
         ref.watch(pendingOfflineTypesProvider.notifier),
     repositoryProviders: repositoryProviders,
@@ -15,8 +15,12 @@ late final syncControllerProvider = Provider.family(
   ),
 );
 
+typedef ReadRepositoryFn = Repository Function(
+  ProviderBase<Repository> provider,
+);
+
 class SyncController {
-  final Ref ref;
+  final ReadRepositoryFn read;
   final DelayedStateNotifier<Set<String>> pendingOfflineTypesNotifier;
   final Map<String, Provider<Repository>> repositoryProviders;
   final RetryStateMachine retryStateMachine;
@@ -24,7 +28,7 @@ class SyncController {
   late RemoveListener _removeUpdateOfflineOperationsListener;
 
   SyncController({
-    required this.ref,
+    required this.read,
     required this.pendingOfflineTypesNotifier,
     required this.repositoryProviders,
     required this.retryStateMachine,
@@ -48,7 +52,7 @@ class SyncController {
     final offlineOperations = types
         .map((type) => repositoryProviders[type])
         .whereType<Provider<Repository>>()
-        .expand((provider) => ref.read(provider).offlineOperations)
+        .expand((provider) => read(provider).offlineOperations)
         .toSet();
     retryStateMachine.updatePendingOfflineOperations(offlineOperations);
   }
