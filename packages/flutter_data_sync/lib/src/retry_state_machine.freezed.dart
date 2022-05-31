@@ -26,17 +26,21 @@ class _$RetryStateTearOff {
     return const _DisabledState();
   }
 
-  _PendingRetryState pendingRetry({int retryCount = 0}) {
+  _PendingRetryState pendingRetry(
+      {int retryCount = 0, int lastProcessedCount = 0}) {
     return _PendingRetryState(
       retryCount: retryCount,
+      lastProcessedCount: lastProcessedCount,
     );
   }
 
   _RetryingState retrying(
       {required int retryCount,
+      required int lastProcessedCount,
       required Set<OfflineOperation> offlineOperations}) {
     return _RetryingState(
       retryCount: retryCount,
+      lastProcessedCount: lastProcessedCount,
       offlineOperations: offlineOperations,
     );
   }
@@ -71,9 +75,10 @@ mixin _$RetryState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
@@ -85,8 +90,9 @@ mixin _$RetryState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -98,8 +104,9 @@ mixin _$RetryState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -205,9 +212,10 @@ class _$_IdleState implements _IdleState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
@@ -222,8 +230,9 @@ class _$_IdleState implements _IdleState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -238,8 +247,9 @@ class _$_IdleState implements _IdleState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -350,9 +360,10 @@ class _$_DisabledState implements _DisabledState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
@@ -367,8 +378,9 @@ class _$_DisabledState implements _DisabledState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -383,8 +395,9 @@ class _$_DisabledState implements _DisabledState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -458,7 +471,7 @@ abstract class _$PendingRetryStateCopyWith<$Res> {
   factory _$PendingRetryStateCopyWith(
           _PendingRetryState value, $Res Function(_PendingRetryState) then) =
       __$PendingRetryStateCopyWithImpl<$Res>;
-  $Res call({int retryCount});
+  $Res call({int retryCount, int lastProcessedCount});
 }
 
 /// @nodoc
@@ -475,11 +488,16 @@ class __$PendingRetryStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object? retryCount = freezed,
+    Object? lastProcessedCount = freezed,
   }) {
     return _then(_PendingRetryState(
       retryCount: retryCount == freezed
           ? _value.retryCount
           : retryCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastProcessedCount: lastProcessedCount == freezed
+          ? _value.lastProcessedCount
+          : lastProcessedCount // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -488,15 +506,19 @@ class __$PendingRetryStateCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_PendingRetryState implements _PendingRetryState {
-  const _$_PendingRetryState({this.retryCount = 0});
+  const _$_PendingRetryState(
+      {this.retryCount = 0, this.lastProcessedCount = 0});
 
   @JsonKey()
   @override
   final int retryCount;
+  @JsonKey()
+  @override
+  final int lastProcessedCount;
 
   @override
   String toString() {
-    return 'RetryState.pendingRetry(retryCount: $retryCount)';
+    return 'RetryState.pendingRetry(retryCount: $retryCount, lastProcessedCount: $lastProcessedCount)';
   }
 
   @override
@@ -505,12 +527,16 @@ class _$_PendingRetryState implements _PendingRetryState {
         (other.runtimeType == runtimeType &&
             other is _PendingRetryState &&
             const DeepCollectionEquality()
-                .equals(other.retryCount, retryCount));
+                .equals(other.retryCount, retryCount) &&
+            const DeepCollectionEquality()
+                .equals(other.lastProcessedCount, lastProcessedCount));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(retryCount));
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(retryCount),
+      const DeepCollectionEquality().hash(lastProcessedCount));
 
   @JsonKey(ignore: true)
   @override
@@ -522,16 +548,17 @@ class _$_PendingRetryState implements _PendingRetryState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
     required TResult Function(Completer<void> closeCompleter) disposing,
     required TResult Function(Completer<void> closeCompleter) disposed,
   }) {
-    return pendingRetry(retryCount);
+    return pendingRetry(retryCount, lastProcessedCount);
   }
 
   @override
@@ -539,15 +566,16 @@ class _$_PendingRetryState implements _PendingRetryState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
     TResult Function(Completer<void> closeCompleter)? disposing,
     TResult Function(Completer<void> closeCompleter)? disposed,
   }) {
-    return pendingRetry?.call(retryCount);
+    return pendingRetry?.call(retryCount, lastProcessedCount);
   }
 
   @override
@@ -555,8 +583,9 @@ class _$_PendingRetryState implements _PendingRetryState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -565,7 +594,7 @@ class _$_PendingRetryState implements _PendingRetryState {
     required TResult orElse(),
   }) {
     if (pendingRetry != null) {
-      return pendingRetry(retryCount);
+      return pendingRetry(retryCount, lastProcessedCount);
     }
     return orElse();
   }
@@ -622,9 +651,11 @@ class _$_PendingRetryState implements _PendingRetryState {
 }
 
 abstract class _PendingRetryState implements RetryState {
-  const factory _PendingRetryState({int retryCount}) = _$_PendingRetryState;
+  const factory _PendingRetryState({int retryCount, int lastProcessedCount}) =
+      _$_PendingRetryState;
 
   int get retryCount;
+  int get lastProcessedCount;
   @JsonKey(ignore: true)
   _$PendingRetryStateCopyWith<_PendingRetryState> get copyWith =>
       throw _privateConstructorUsedError;
@@ -635,7 +666,10 @@ abstract class _$RetryingStateCopyWith<$Res> {
   factory _$RetryingStateCopyWith(
           _RetryingState value, $Res Function(_RetryingState) then) =
       __$RetryingStateCopyWithImpl<$Res>;
-  $Res call({int retryCount, Set<OfflineOperation> offlineOperations});
+  $Res call(
+      {int retryCount,
+      int lastProcessedCount,
+      Set<OfflineOperation> offlineOperations});
 }
 
 /// @nodoc
@@ -651,12 +685,17 @@ class __$RetryingStateCopyWithImpl<$Res> extends _$RetryStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object? retryCount = freezed,
+    Object? lastProcessedCount = freezed,
     Object? offlineOperations = freezed,
   }) {
     return _then(_RetryingState(
       retryCount: retryCount == freezed
           ? _value.retryCount
           : retryCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastProcessedCount: lastProcessedCount == freezed
+          ? _value.lastProcessedCount
+          : lastProcessedCount // ignore: cast_nullable_to_non_nullable
               as int,
       offlineOperations: offlineOperations == freezed
           ? _value.offlineOperations
@@ -670,16 +709,20 @@ class __$RetryingStateCopyWithImpl<$Res> extends _$RetryStateCopyWithImpl<$Res>
 
 class _$_RetryingState implements _RetryingState {
   const _$_RetryingState(
-      {required this.retryCount, required this.offlineOperations});
+      {required this.retryCount,
+      required this.lastProcessedCount,
+      required this.offlineOperations});
 
   @override
   final int retryCount;
+  @override
+  final int lastProcessedCount;
   @override
   final Set<OfflineOperation> offlineOperations;
 
   @override
   String toString() {
-    return 'RetryState.retrying(retryCount: $retryCount, offlineOperations: $offlineOperations)';
+    return 'RetryState.retrying(retryCount: $retryCount, lastProcessedCount: $lastProcessedCount, offlineOperations: $offlineOperations)';
   }
 
   @override
@@ -690,6 +733,8 @@ class _$_RetryingState implements _RetryingState {
             const DeepCollectionEquality()
                 .equals(other.retryCount, retryCount) &&
             const DeepCollectionEquality()
+                .equals(other.lastProcessedCount, lastProcessedCount) &&
+            const DeepCollectionEquality()
                 .equals(other.offlineOperations, offlineOperations));
   }
 
@@ -697,6 +742,7 @@ class _$_RetryingState implements _RetryingState {
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(retryCount),
+      const DeepCollectionEquality().hash(lastProcessedCount),
       const DeepCollectionEquality().hash(offlineOperations));
 
   @JsonKey(ignore: true)
@@ -709,16 +755,17 @@ class _$_RetryingState implements _RetryingState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
     required TResult Function(Completer<void> closeCompleter) disposing,
     required TResult Function(Completer<void> closeCompleter) disposed,
   }) {
-    return retrying(retryCount, offlineOperations);
+    return retrying(retryCount, lastProcessedCount, offlineOperations);
   }
 
   @override
@@ -726,15 +773,16 @@ class _$_RetryingState implements _RetryingState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
     TResult Function(Completer<void> closeCompleter)? disposing,
     TResult Function(Completer<void> closeCompleter)? disposed,
   }) {
-    return retrying?.call(retryCount, offlineOperations);
+    return retrying?.call(retryCount, lastProcessedCount, offlineOperations);
   }
 
   @override
@@ -742,8 +790,9 @@ class _$_RetryingState implements _RetryingState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -752,7 +801,7 @@ class _$_RetryingState implements _RetryingState {
     required TResult orElse(),
   }) {
     if (retrying != null) {
-      return retrying(retryCount, offlineOperations);
+      return retrying(retryCount, lastProcessedCount, offlineOperations);
     }
     return orElse();
   }
@@ -811,9 +860,11 @@ class _$_RetryingState implements _RetryingState {
 abstract class _RetryingState implements RetryState {
   const factory _RetryingState(
       {required int retryCount,
+      required int lastProcessedCount,
       required Set<OfflineOperation> offlineOperations}) = _$_RetryingState;
 
   int get retryCount;
+  int get lastProcessedCount;
   Set<OfflineOperation> get offlineOperations;
   @JsonKey(ignore: true)
   _$RetryingStateCopyWith<_RetryingState> get copyWith =>
@@ -864,9 +915,10 @@ class _$_CancellingDisabledState implements _CancellingDisabledState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
@@ -881,8 +933,9 @@ class _$_CancellingDisabledState implements _CancellingDisabledState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -897,8 +950,9 @@ class _$_CancellingDisabledState implements _CancellingDisabledState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -1010,9 +1064,10 @@ class _$_CancellingEnabledState implements _CancellingEnabledState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
@@ -1027,8 +1082,9 @@ class _$_CancellingEnabledState implements _CancellingEnabledState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -1043,8 +1099,9 @@ class _$_CancellingEnabledState implements _CancellingEnabledState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -1180,9 +1237,10 @@ class _$_DisposingState implements _DisposingState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
@@ -1197,8 +1255,9 @@ class _$_DisposingState implements _DisposingState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -1213,8 +1272,9 @@ class _$_DisposingState implements _DisposingState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -1356,9 +1416,10 @@ class _$_DisposedState implements _DisposedState {
   TResult when<TResult extends Object?>({
     required TResult Function() idle,
     required TResult Function() disabled,
-    required TResult Function(int retryCount) pendingRetry,
-    required TResult Function(
-            int retryCount, Set<OfflineOperation> offlineOperations)
+    required TResult Function(int retryCount, int lastProcessedCount)
+        pendingRetry,
+    required TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)
         retrying,
     required TResult Function() cancellingDisabled,
     required TResult Function() cancellingEnabled,
@@ -1373,8 +1434,9 @@ class _$_DisposedState implements _DisposedState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -1389,8 +1451,9 @@ class _$_DisposedState implements _DisposedState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? idle,
     TResult Function()? disabled,
-    TResult Function(int retryCount)? pendingRetry,
-    TResult Function(int retryCount, Set<OfflineOperation> offlineOperations)?
+    TResult Function(int retryCount, int lastProcessedCount)? pendingRetry,
+    TResult Function(int retryCount, int lastProcessedCount,
+            Set<OfflineOperation> offlineOperations)?
         retrying,
     TResult Function()? cancellingDisabled,
     TResult Function()? cancellingEnabled,
@@ -1485,8 +1548,10 @@ class _$RetryEventTearOff {
     return const _ProcessEvent();
   }
 
-  _ProcessingDoneEvent processingDone() {
-    return const _ProcessingDoneEvent();
+  _ProcessingDoneEvent processingDone(int processedCount) {
+    return _ProcessingDoneEvent(
+      processedCount,
+    );
   }
 
   _DisposeEvent dispose(Completer<void> closeCompleter) {
@@ -1507,7 +1572,7 @@ mixin _$RetryEvent {
     required TResult Function() disable,
     required TResult Function() retryOperations,
     required TResult Function() process,
-    required TResult Function() processingDone,
+    required TResult Function(int processedCount) processingDone,
     required TResult Function(Completer<void> closeCompleter) dispose,
   }) =>
       throw _privateConstructorUsedError;
@@ -1517,7 +1582,7 @@ mixin _$RetryEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
   }) =>
       throw _privateConstructorUsedError;
@@ -1527,7 +1592,7 @@ mixin _$RetryEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
     required TResult orElse(),
   }) =>
@@ -1625,7 +1690,7 @@ class _$_EnableEvent implements _EnableEvent {
     required TResult Function() disable,
     required TResult Function() retryOperations,
     required TResult Function() process,
-    required TResult Function() processingDone,
+    required TResult Function(int processedCount) processingDone,
     required TResult Function(Completer<void> closeCompleter) dispose,
   }) {
     return enable();
@@ -1638,7 +1703,7 @@ class _$_EnableEvent implements _EnableEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
   }) {
     return enable?.call();
@@ -1651,7 +1716,7 @@ class _$_EnableEvent implements _EnableEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
     required TResult orElse(),
   }) {
@@ -1753,7 +1818,7 @@ class _$_DisableEvent implements _DisableEvent {
     required TResult Function() disable,
     required TResult Function() retryOperations,
     required TResult Function() process,
-    required TResult Function() processingDone,
+    required TResult Function(int processedCount) processingDone,
     required TResult Function(Completer<void> closeCompleter) dispose,
   }) {
     return disable();
@@ -1766,7 +1831,7 @@ class _$_DisableEvent implements _DisableEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
   }) {
     return disable?.call();
@@ -1779,7 +1844,7 @@ class _$_DisableEvent implements _DisableEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
     required TResult orElse(),
   }) {
@@ -1882,7 +1947,7 @@ class _$_RetryOperationsEvent implements _RetryOperationsEvent {
     required TResult Function() disable,
     required TResult Function() retryOperations,
     required TResult Function() process,
-    required TResult Function() processingDone,
+    required TResult Function(int processedCount) processingDone,
     required TResult Function(Completer<void> closeCompleter) dispose,
   }) {
     return retryOperations();
@@ -1895,7 +1960,7 @@ class _$_RetryOperationsEvent implements _RetryOperationsEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
   }) {
     return retryOperations?.call();
@@ -1908,7 +1973,7 @@ class _$_RetryOperationsEvent implements _RetryOperationsEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
     required TResult orElse(),
   }) {
@@ -2010,7 +2075,7 @@ class _$_ProcessEvent implements _ProcessEvent {
     required TResult Function() disable,
     required TResult Function() retryOperations,
     required TResult Function() process,
-    required TResult Function() processingDone,
+    required TResult Function(int processedCount) processingDone,
     required TResult Function(Completer<void> closeCompleter) dispose,
   }) {
     return process();
@@ -2023,7 +2088,7 @@ class _$_ProcessEvent implements _ProcessEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
   }) {
     return process?.call();
@@ -2036,7 +2101,7 @@ class _$_ProcessEvent implements _ProcessEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
     required TResult orElse(),
   }) {
@@ -2099,6 +2164,7 @@ abstract class _$ProcessingDoneEventCopyWith<$Res> {
   factory _$ProcessingDoneEventCopyWith(_ProcessingDoneEvent value,
           $Res Function(_ProcessingDoneEvent) then) =
       __$ProcessingDoneEventCopyWithImpl<$Res>;
+  $Res call({int processedCount});
 }
 
 /// @nodoc
@@ -2111,26 +2177,51 @@ class __$ProcessingDoneEventCopyWithImpl<$Res>
 
   @override
   _ProcessingDoneEvent get _value => super._value as _ProcessingDoneEvent;
+
+  @override
+  $Res call({
+    Object? processedCount = freezed,
+  }) {
+    return _then(_ProcessingDoneEvent(
+      processedCount == freezed
+          ? _value.processedCount
+          : processedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
 }
 
 /// @nodoc
 
 class _$_ProcessingDoneEvent implements _ProcessingDoneEvent {
-  const _$_ProcessingDoneEvent();
+  const _$_ProcessingDoneEvent(this.processedCount);
+
+  @override
+  final int processedCount;
 
   @override
   String toString() {
-    return 'RetryEvent.processingDone()';
+    return 'RetryEvent.processingDone(processedCount: $processedCount)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _ProcessingDoneEvent);
+        (other.runtimeType == runtimeType &&
+            other is _ProcessingDoneEvent &&
+            const DeepCollectionEquality()
+                .equals(other.processedCount, processedCount));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(
+      runtimeType, const DeepCollectionEquality().hash(processedCount));
+
+  @JsonKey(ignore: true)
+  @override
+  _$ProcessingDoneEventCopyWith<_ProcessingDoneEvent> get copyWith =>
+      __$ProcessingDoneEventCopyWithImpl<_ProcessingDoneEvent>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -2139,10 +2230,10 @@ class _$_ProcessingDoneEvent implements _ProcessingDoneEvent {
     required TResult Function() disable,
     required TResult Function() retryOperations,
     required TResult Function() process,
-    required TResult Function() processingDone,
+    required TResult Function(int processedCount) processingDone,
     required TResult Function(Completer<void> closeCompleter) dispose,
   }) {
-    return processingDone();
+    return processingDone(processedCount);
   }
 
   @override
@@ -2152,10 +2243,10 @@ class _$_ProcessingDoneEvent implements _ProcessingDoneEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
   }) {
-    return processingDone?.call();
+    return processingDone?.call(processedCount);
   }
 
   @override
@@ -2165,12 +2256,12 @@ class _$_ProcessingDoneEvent implements _ProcessingDoneEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
     required TResult orElse(),
   }) {
     if (processingDone != null) {
-      return processingDone();
+      return processingDone(processedCount);
     }
     return orElse();
   }
@@ -2220,7 +2311,13 @@ class _$_ProcessingDoneEvent implements _ProcessingDoneEvent {
 }
 
 abstract class _ProcessingDoneEvent implements RetryEvent {
-  const factory _ProcessingDoneEvent() = _$_ProcessingDoneEvent;
+  const factory _ProcessingDoneEvent(int processedCount) =
+      _$_ProcessingDoneEvent;
+
+  int get processedCount;
+  @JsonKey(ignore: true)
+  _$ProcessingDoneEventCopyWith<_ProcessingDoneEvent> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -2292,7 +2389,7 @@ class _$_DisposeEvent implements _DisposeEvent {
     required TResult Function() disable,
     required TResult Function() retryOperations,
     required TResult Function() process,
-    required TResult Function() processingDone,
+    required TResult Function(int processedCount) processingDone,
     required TResult Function(Completer<void> closeCompleter) dispose,
   }) {
     return dispose(closeCompleter);
@@ -2305,7 +2402,7 @@ class _$_DisposeEvent implements _DisposeEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
   }) {
     return dispose?.call(closeCompleter);
@@ -2318,7 +2415,7 @@ class _$_DisposeEvent implements _DisposeEvent {
     TResult Function()? disable,
     TResult Function()? retryOperations,
     TResult Function()? process,
-    TResult Function()? processingDone,
+    TResult Function(int processedCount)? processingDone,
     TResult Function(Completer<void> closeCompleter)? dispose,
     required TResult orElse(),
   }) {

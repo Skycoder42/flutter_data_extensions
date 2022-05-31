@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_data/flutter_data.dart';
@@ -22,9 +23,11 @@ class RetryState with _$RetryState {
   const factory RetryState.disabled() = _DisabledState;
   const factory RetryState.pendingRetry({
     @Default(0) int retryCount,
+    @Default(0) int lastProcessedCount,
   }) = _PendingRetryState;
   const factory RetryState.retrying({
     required int retryCount,
+    required int lastProcessedCount,
     required Set<OfflineOperation> offlineOperations,
   }) = _RetryingState;
   const factory RetryState.cancellingDisabled() = _CancellingDisabledState;
@@ -43,7 +46,8 @@ class RetryEvent with _$RetryEvent {
   const factory RetryEvent.disable() = _DisableEvent;
   const factory RetryEvent.retryOperations() = _RetryOperationsEvent;
   const factory RetryEvent.process() = _ProcessEvent;
-  const factory RetryEvent.processingDone() = _ProcessingDoneEvent;
+  const factory RetryEvent.processingDone(int processedCount) =
+      _ProcessingDoneEvent;
   const factory RetryEvent.dispose(Completer<void> closeCompleter) =
       _DisposeEvent;
 }
@@ -104,6 +108,7 @@ class RetryStateMachine extends StateMachine<RetryEvent, RetryState> {
               ? const RetryState.idle()
               : RetryState.retrying(
                   retryCount: s.retryCount,
+                  lastProcessedCount: s.lastProcessedCount,
                   offlineOperations: _pendingOfflineOperations,
                 ),
         )
@@ -122,7 +127,10 @@ class RetryStateMachine extends StateMachine<RetryEvent, RetryState> {
         )
         ..on<_ProcessingDoneEvent>(
           (e, s) => RetryState.pendingRetry(
-            retryCount: s.retryCount + 1, // TODO decrement if less operations
+            lastProcessedCount: e.processedCount,
+            retryCount: e.processedCount < s.lastProcessedCount
+                ? math.max(s.retryCount - 1, 0)
+                : s.retryCount + 1,
           ),
         )
         ..on<_DisposeEvent>(
@@ -275,7 +283,7 @@ class RetryStateMachine extends StateMachine<RetryEvent, RetryState> {
       }
     } finally {
       await semaphore.dispose();
-      add(const RetryEvent.processingDone());
+      add(RetryEvent.processingDone(offlineOperations.length));
     }
   }
 

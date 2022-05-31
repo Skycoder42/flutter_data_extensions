@@ -189,9 +189,10 @@ void main() {
       );
     });
 
-    group('pendingRetry(retryCount: 1)', () {
+    group('pendingRetry(retryCount: 1, lastProcessedCount: 5)', () {
       const seedState = RetryState.pendingRetry(
         retryCount: 1,
+        lastProcessedCount: 5,
       );
 
       blocTest<RetryStateMachine, RetryState>(
@@ -253,7 +254,7 @@ void main() {
 
       blocTest<RetryStateMachine, RetryState>(
         // ignore: lines_longer_than_80_chars
-        '-{<timeout> [pending operations]}-> [retrying(retryCount: 1, offlineOperations: {...})]',
+        '-{<timeout> [pending operations]}-> [retrying(retryCount: 1, lastProcessedCount: 5, offlineOperations: {...})]',
         build: createStateMachine,
         seed: () => seedState,
         act: (bloc) => bloc.debugSetPendingOfflineOperations({mockOperation}),
@@ -261,16 +262,21 @@ void main() {
         expect: () => [
           RetryState.retrying(
             retryCount: 1,
+            lastProcessedCount: 5,
             offlineOperations: {mockOperation},
           ),
         ],
       );
     });
 
-    group('retrying(retryCount: 5, offlineOperations: {...})', () {
+    group(
+        // ignore: lines_longer_than_80_chars
+        'retrying(retryCount: 5, lastProcessedCount: 3, offlineOperations: {...})',
+        () {
       const retryCount = 5;
       final seedState = RetryState.retrying(
         retryCount: retryCount,
+        lastProcessedCount: 3,
         offlineOperations: {mockOperation},
       );
 
@@ -322,14 +328,18 @@ void main() {
       );
 
       blocTest<RetryStateMachine, RetryState>(
-        '-{processOperations}-> [pendingRetry(retryCount: 6)]',
+        // ignore: lines_longer_than_80_chars
+        '-{processOperations}-> [pendingRetry(retryCount: 4, lastProcessedCount: 1)]',
         build: createStateMachine,
         setUp: () {
           when(() => mockOperation.retry<dynamic>()).thenReturnAsync(null);
         },
         seed: () => seedState,
         expect: () => [
-          const RetryState.pendingRetry(retryCount: retryCount + 1),
+          const RetryState.pendingRetry(
+            retryCount: retryCount - 1,
+            lastProcessedCount: 1,
+          ),
         ],
         verify: (bloc) {
           verify(() => mockOperation.retry<dynamic>()).called(1);
@@ -337,7 +347,8 @@ void main() {
       );
 
       blocTest<RetryStateMachine, RetryState>(
-        '-{processOperations [x operations]}-> [pendingRetry(retryCount: 6)]',
+        // ignore: lines_longer_than_80_chars
+        '-{processOperations [x operations]}-> [pendingRetry(retryCount: 6, lastProcessedCount: 20)]',
         build: createStateMachine,
         setUp: () {
           mockOperation.allowEqual = false;
@@ -345,12 +356,16 @@ void main() {
         },
         seed: () => RetryState.retrying(
           retryCount: retryCount,
+          lastProcessedCount: 3,
           offlineOperations:
               List.filled(Semaphore.defaultMaxCount * 2, mockOperation).toSet(),
         ),
         wait: const Duration(seconds: 2),
         expect: () => [
-          const RetryState.pendingRetry(retryCount: retryCount + 1),
+          const RetryState.pendingRetry(
+            retryCount: retryCount + 1,
+            lastProcessedCount: Semaphore.defaultMaxCount * 2,
+          ),
         ],
         verify: (bloc) {
           verify(() => mockOperation.retry<dynamic>())
@@ -420,6 +435,7 @@ void main() {
         },
         seed: () => RetryState.retrying(
           retryCount: 0,
+          lastProcessedCount: 0,
           offlineOperations: List.filled(2, mockOperation).toSet(),
         ),
         act: (bloc) => bloc.enabled = false,
@@ -494,7 +510,8 @@ void main() {
           );
         },
         seed: () => RetryState.retrying(
-          retryCount: 0,
+          retryCount: 10,
+          lastProcessedCount: 10,
           offlineOperations: {mockOperation, mockOperation},
         ),
         act: (bloc) => bloc
@@ -521,7 +538,8 @@ void main() {
           );
         },
         seed: () => RetryState.retrying(
-          retryCount: 0,
+          retryCount: 10,
+          lastProcessedCount: 10,
           offlineOperations: {mockOperation, mockOperation},
         ),
         act: (bloc) => bloc
@@ -598,7 +616,8 @@ void main() {
           );
         },
         seed: () => RetryState.retrying(
-          retryCount: 0,
+          retryCount: 10,
+          lastProcessedCount: 10,
           offlineOperations: {mockOperation, mockOperation},
         ),
         act: (bloc) {
@@ -655,7 +674,7 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         // ignore: invalid_use_of_protected_member
-        sut.add(const RetryEvent.processingDone());
+        sut.add(const RetryEvent.processingDone(0));
         await Future<void>.delayed(const Duration(milliseconds: 500));
         expect(sut.isClosed, isTrue);
       },
