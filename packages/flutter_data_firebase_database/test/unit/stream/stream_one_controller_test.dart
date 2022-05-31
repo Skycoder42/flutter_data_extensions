@@ -290,7 +290,6 @@ void main() {
             id: testId,
             createStream: () async => streams.removeAt(0),
             adapter: mockAdapter,
-            autoRenew: true,
             onUnsupportedEvent: mockOnUnsupportedEvent,
           );
 
@@ -320,7 +319,6 @@ void main() {
             id: testId,
             createStream: () async => streams.removeAt(0),
             adapter: mockAdapter,
-            autoRenew: true,
             onUnsupportedEvent: mockOnUnsupportedEvent,
           );
 
@@ -347,7 +345,6 @@ void main() {
             id: testId,
             createStream: () async => streams.removeAt(0),
             adapter: mockAdapter,
-            autoRenew: true,
             onUnsupportedEvent: mockOnUnsupportedEvent,
           );
 

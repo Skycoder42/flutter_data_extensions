@@ -5,19 +5,19 @@ import 'package:test/test.dart' as test;
 abstract class Setup {
   @protected
   @mustCallSuper
-  Future<void> setUpAll() => Future.value(null);
+  Future<void> setUpAll() => Future.value();
 
   @protected
   @mustCallSuper
-  Future<void> tearDownAll() => Future.value(null);
+  Future<void> tearDownAll() => Future.value();
 
   @protected
   @mustCallSuper
-  Future<void> setUp() => Future.value(null);
+  Future<void> setUp() => Future.value();
 
   @protected
   @mustCallSuper
-  Future<void> tearDown() => Future.value(null);
+  Future<void> tearDown() => Future.value();
 
   void call() {
     test.setUpAll(setUpAll);

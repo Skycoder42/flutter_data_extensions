@@ -720,8 +720,6 @@ void main() {
           final sut = StreamAllController(
             createStream: () async => streams.removeAt(0),
             adapter: mockAdapter,
-            syncLocal: false,
-            autoRenew: true,
             onUnsupportedEvent: mockOnUnsupportedEvent,
           );
 
@@ -750,8 +748,6 @@ void main() {
           final sut = StreamAllController(
             createStream: () async => streams.removeAt(0),
             adapter: mockAdapter,
-            syncLocal: false,
-            autoRenew: true,
             onUnsupportedEvent: mockOnUnsupportedEvent,
           );
 
@@ -777,8 +773,6 @@ void main() {
           final sut = StreamAllController(
             createStream: () async => streams.removeAt(0),
             adapter: mockAdapter,
-            syncLocal: false,
-            autoRenew: true,
             onUnsupportedEvent: mockOnUnsupportedEvent,
           );
 
